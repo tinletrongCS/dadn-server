@@ -1,6 +1,6 @@
 # dadn-server
 
-## 🚀 Quick Start 
+## Hướng dẫn cấu hình
 
 1. Clone repo:
 ```bash
@@ -41,7 +41,7 @@ docker compose down
 
 ## Local 
 
-1. Tạo virtualenv:
+1. Tạo venv:
 ```bash
 python -m venv venv
 venv\Scripts\activate
@@ -58,7 +58,7 @@ uvicorn main:app --reload
 
 ---
 
-## 📁 File checklist
+## File checklist
 
 - `app/.env.example` (commit)
 - `.gitignore` includes `.env`, `venv/`, `__pycache__/`
@@ -73,4 +73,4 @@ uvicorn main:app --reload
 3. Fill secret values
 4. `docker compose up -d --build`
 
-> Nếu cần, share `.env` giá trị thật qua kênh an toàn nội bộ (Slack private, Teams, email bảo mật), không push lên Git.
+> File `.env` sẽ được gửi trong nhóm Zalo nội bộ 
