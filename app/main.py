@@ -4,4 +4,4 @@ app = FastAPI()
 
 @app.get("/")
 def read_root():
-    return {"status": "ok", "message": "IoT server is running"}
+    return {"status": "OK", "message": "Server is running"}

@@ -14,14 +14,19 @@ services:
       - postgres_data:/var/lib/postgresql/data
   api:
     build: .
-    container_name: smart_farm_api
+    container_name: smart_farm_api_img
     restart: always
     volumes:
       - .:/app
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=postgresql://admin:Admin@2026@db:5432/farm_db
+      - DB_CONNECTION=${DB_CONNECTION}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_DATABASE=${DB_DATABASE}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
     depends_on:
       - db
 volumes:
