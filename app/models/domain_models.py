@@ -17,6 +17,7 @@ from sqlalchemy.sql import text
 
 Base = declarative_base()
 
+# Ánh xạ từ các bảng trong db qua đây
 
 class User(Base):
 	__tablename__ = "user"
@@ -37,6 +38,8 @@ class Device(Base):
 	__tablename__ = "device"
 
 	device_id = Column(Integer, primary_key=True)
+	# `name` lưu trữ giá trị từ trường device_source 
+    # được gửi từ payload của thiết bị IoT payloads (vd "YOLOFARM_001")
 	name = Column(String(100), nullable=False)
 	mode = Column(String(20), default='manual')
 	pump_status = Column(Boolean, default=False)
