@@ -74,3 +74,8 @@ uvicorn main:app --reload
 4. `docker compose up -d --build`
 
 > File `.env` sẽ được gửi trong nhóm Zalo nội bộ 
+
+## Chạy Dokcer 
+```bash
+docker-compose up -d --build
+```
