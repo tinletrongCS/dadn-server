@@ -81,6 +81,7 @@ docker-compose up -d --build
 ```
 
 ## Cấu trúc các module chính trong dự án 
+```bash
 app/
 ├── core/                  # Thư mục chứa cấu hình lõi
 │   ├── security.py        # Xử lý băm mật khẩu, tạo Token JWT
@@ -99,3 +100,4 @@ app/
 ├── main.py                # Khởi chạy app và nhúng các router vào
 ├── requirements.txt       
 └── docker-compose.yml
+```
