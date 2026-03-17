@@ -5,9 +5,9 @@ services:
     container_name: smart_farm_db
     restart: always
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: Admin@2026
-      POSTGRES_DB: farm_db
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_DATABASE}
     ports:
       - "5433:5432"
     volumes:
@@ -20,13 +20,8 @@ services:
       - .:/app
     ports:
       - "8000:8000"
-    environment:
-      - DB_CONNECTION=${DB_CONNECTION}
-      - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT}
-      - DB_DATABASE=${DB_DATABASE}
-      - DB_USERNAME=${DB_USERNAME}
-      - DB_PASSWORD=${DB_PASSWORD}
+    env_file:
+      - .env
     depends_on:
       - db
 volumes:
