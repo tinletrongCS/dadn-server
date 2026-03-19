@@ -50,3 +50,32 @@ CREATE TABLE activity_log (
     description TEXT,
     created_at TIMESTAMP DEFAULT NOW()
 );
+
+
+-- 5. TẠO BẢNG OTP TOKENS
+CREATE TABLE otp_tokens (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(255) NOT NULL,
+    otp_code VARCHAR(10) NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    used BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Tạo Index cho cột email 
+CREATE INDEX idx_otp_tokens_email ON otp_tokens(email);
+
+
+-- 6. TẠO BẢNG PENDING COMMANDS
+CREATE TABLE pending_commands (
+    command_id BIGSERIAL PRIMARY KEY,
+    device_id INTEGER NOT NULL REFERENCES device(device_id) ON DELETE CASCADE,
+    actuator VARCHAR(20) NOT NULL,
+    action VARCHAR(10) NOT NULL,
+    issued_by UUID REFERENCES "user"(user_id) ON DELETE SET NULL,
+    source VARCHAR(20) DEFAULT 'manual',
+    status VARCHAR(20) DEFAULT 'pending',
+    error_detail TEXT,
+    issued_at TIMESTAMP DEFAULT NOW(),
+    acked_at TIMESTAMP
+);

@@ -5,3 +5,11 @@ psycopg2-binary
 pydantic
 passlib[bcrypt]
 pydantic-settings
+python-dotenv
+
+python-jose[cryptography]
+passlib[bcrypt]
+python-multipart
+websockets
+emails
+httpx

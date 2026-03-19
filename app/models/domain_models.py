@@ -24,6 +24,7 @@ class User(Base):
 
 	user_id = Column(PG_UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()"))
 	username = Column(String(50), unique=True, nullable=False)
+	email = Column(String(255), unique=True, nullable=False)
 	password_hash = Column(String(255), nullable=False)
 	full_name = Column(String(100), nullable=False)
 	role_id = Column(Integer, nullable=False)  # 1: admin, 2: farmer
@@ -38,8 +39,7 @@ class Device(Base):
 	__tablename__ = "device"
 
 	device_id = Column(Integer, primary_key=True)
-	# `name` lưu trữ giá trị từ trường device_source 
-    # được gửi từ payload của thiết bị IoT payloads (vd "YOLOFARM_001")
+	# `name` lưu trữ giá trị từ trường device_source được gửi từ payload của thiết bị IoT payloads (vd "YOLOFARM_001")
 	name = Column(String(100), nullable=False)
 	mode = Column(String(20), default='manual')
 	pump_status = Column(Boolean, default=False)
@@ -95,3 +95,24 @@ class ActivityLog(Base):
 	def __repr__(self):
 		return f"<ActivityLog(id={self.id}, action_type={self.action_type!r})>"
 
+class OtpToken(Base):
+    __tablename__ = "otp_tokens"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    email = Column(String(255), nullable=False, index=True)
+    otp_code = Column(String(10), nullable=False)
+    expires_at = Column(TIMESTAMP, nullable=False)
+    used = Column(Boolean, default=False)
+    created_at = Column(TIMESTAMP, server_default=func.now())
+
+class PendingCommand(Base):
+    __tablename__ = "pending_commands"
+    command_id = Column(BigInteger, primary_key=True, autoincrement=True)
+    device_id = Column(String(100), ForeignKey("device.device_id"), nullable=False)
+    actuator = Column(String(20), nullable=False)   # "pump" | "fan"
+    action = Column(String(10), nullable=False)     # "on"  | "off"
+    issued_by = Column(PG_UUID(as_uuid=True), ForeignKey("user.user_id"), nullable=True)
+    source = Column(String(20), default="manual")   # "manual" | "auto"
+    status = Column(String(20), default="pending")  # "pending"|"done"|"error"
+    error_detail = Column(Text, nullable=True)
+    issued_at = Column(TIMESTAMP, server_default=func.now())
+    acked_at = Column(TIMESTAMP, nullable=True)
