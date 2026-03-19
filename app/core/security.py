@@ -43,21 +43,3 @@ def verify_token(token: str) -> dict:
             headers={"WWW-Authenticate": "Bearer"},
         )
     
-async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:
-    payload = verify_token(token)
-    user_id: str = payload.get("sub")
-    if user_id is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token không chứa user_id"
-        )
-    
-    user = db.query(User).filter(User.user_id == user_id).first()
-    if user is None or user.is_active == False:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Tài khoản không tồn tại hoặc đã bị khóa")
-    return user 
-
-async def require_admin(current_user: User = Depends(get_current_user)) -> User:
-    if current_user.role_id != 1:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Không đủ quyền truy cập. Yêu cầu quyền Admin.")
-    return current_user

@@ -1,10 +1,29 @@
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from typing import Optional, List
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict, field_serializer
 from uuid import UUID
 
+ICT = timezone(timedelta(hours=7))
 
-# 1. PAYLOAD TỪ MẠCH YOLOBIT 
+def to_ict(dt: datetime) -> str:
+    if dt is None:
+        return None
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(ICT).isoformat()
+
+# set timezone là tại TPHCM UTC+7 
+class ICTBaseModel(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    @field_serializer('*')
+    def serialize_datetime(self, value):
+        if isinstance(value, datetime):
+            return to_ict(value)
+        return value
+
+
+# 1. PAYLOAD TỪ MẠCH YOLOBIT
 class SensorDetail(BaseModel):
     value: float
     unit: str
@@ -45,16 +64,15 @@ class DevicePayload(BaseModel):
         }
     )
 
-# 2. AUTHENTICATION (API Đăng nhập / Quên MK)
 
-# DTO dùng đăng kí tài khoản 
+# 2. AUTHENTICATION (API Đăng nhập / Quên MK)
 class UserCreate(BaseModel):
     username: str
     email: str
     password: str
     full_name: str
-    role_id: int = 2  
-    
+    role_id: int = 2
+
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
@@ -63,15 +81,16 @@ class MessageResponse(BaseModel):
     message: str
 
 class ForgotPasswordSchema(BaseModel):
-    email: str  # Dùng email để gửi OTP
+    email: str
 
 class ResetPasswordSchema(BaseModel):
     email: str
     otp: str
     new_password: str
 
-# 3. USER (Trả dữ liệu người dùng)
-class UserResponse(BaseModel):
+
+# 3. USER
+class UserResponse(ICTBaseModel):
     user_id: UUID
     username: str
     full_name: str
@@ -79,9 +98,8 @@ class UserResponse(BaseModel):
     is_active: bool
     created_at: datetime
 
-    model_config = ConfigDict(from_attributes=True) 
 
-# 4. DEVICE (Quản lý Thiết bị)
+# 4. DEVICE
 class DeviceCreateUpdate(BaseModel):
     name: str
     mode: Optional[str] = "manual"
@@ -94,16 +112,15 @@ class DeviceCreateUpdate(BaseModel):
     light_min: Optional[int] = None
     light_max: Optional[int] = None
 
-class DeviceResponse(DeviceCreateUpdate):
+class DeviceResponse(ICTBaseModel, DeviceCreateUpdate):
     device_id: int
     pump_status: bool
     fan_status: bool
-    last_seen: Optional[datetime]
+    last_seen: Optional[datetime] = None
 
-    model_config = ConfigDict(from_attributes=True)
 
 # 5. SENSOR DATA VÀ ACTIVITY LOGS
-class SensorDataResponse(BaseModel):
+class SensorDataResponse(ICTBaseModel):
     id: int
     device_id: int
     temperature: float
@@ -112,14 +129,10 @@ class SensorDataResponse(BaseModel):
     light_intensity: int
     measured_at: datetime
 
-    model_config = ConfigDict(from_attributes=True)
-
-class ActivityLogResponse(BaseModel):
+class ActivityLogResponse(ICTBaseModel):
     id: int
     user_id: Optional[UUID]
     device_id: Optional[int]
     action_type: str
     description: Optional[str]
     created_at: datetime
-
-    model_config = ConfigDict(from_attributes=True)

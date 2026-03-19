@@ -4,13 +4,8 @@ from sqlalchemy.orm import Session
 from database import get_db
 from models.domain_models import User
 from schemas.domain_schemas import TokenResponse, MessageResponse, UserResponse, UserCreate
-from core.security import (
-    verify_password, 
-    create_access_token, 
-    get_password_hash,
-    get_current_user
-)
-
+from core.security import verify_password, create_access_token, get_password_hash
+from dependencies.auth_deps import get_current_user, require_admin, get_device_or_404
 router = APIRouter()
 
 # Đăng ký 
