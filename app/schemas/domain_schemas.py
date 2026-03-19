@@ -47,6 +47,14 @@ class DevicePayload(BaseModel):
 
 # 2. AUTHENTICATION (API Đăng nhập / Quên MK)
 
+# DTO dùng đăng kí tài khoản 
+class UserCreate(BaseModel):
+    username: str
+    email: str
+    password: str
+    full_name: str
+    role_id: int = 2  
+    
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"

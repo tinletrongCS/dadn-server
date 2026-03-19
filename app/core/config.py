@@ -4,7 +4,7 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "Smart Farm IoT Backend"
     
     DATABASE_URL: str
-    # cấu hình bảo mật cho module 5 
+    # cấu hình bảo mật 
     SECRET_KEY: str = "secret" 
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # token hết hạn sau 7 ngày 

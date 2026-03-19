@@ -1,24 +1,57 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
+from app.database import get_db
+from app.models.domain_models import User
+from app.schemas.domain_schemas import TokenResponse, MessageResponse, UserResponse, UserCreate
+from app.core.security import (
+    verify_password, 
+    create_access_token, 
+    get_password_hash,
+    get_current_user
+)
 
-from database import get_db 
-from models.domain_models import User
-# UC9 - Đăng nhập
-@router.post("/login")
-async def login(form: LoginSchema, db: Session = Depends(get_db)) -> TokenResponse:
-    """Xác thực username/password, trả về JWT token"""
+router = APIRouter()
 
-# UC9B - Đăng xuất
-@router.post("/logout")
-async def logout(current_user: User = Depends(get_current_user)) -> MessageResponse:
-    """Thu hồi/vô hiệu hóa token hiện tại"""
+# dki
+@router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+async def register_user(user_in: UserCreate, db: Session = Depends(get_db)):
+    """Đăng ký tài khoản mới"""
+    # 1. Kiểm tra xem username hoặc email đã tồn tại chưa
+    if db.query(User).filter(User.username == user_in.username).first():
+        raise HTTPException(status_code=400, detail="Tên đăng nhập đã tồn tại")
+    if db.query(User).filter(User.email == user_in.email).first():
+        raise HTTPException(status_code=400, detail="Email đã được sử dụng")
+    
+    # 2. Băm mật khẩu và tạo User mới
+    new_user = User(
+        username=user_in.username,
+        email=user_in.email,
+        password_hash=get_password_hash(user_in.password),
+        full_name=user_in.full_name,
+        role_id=user_in.role_id
+    )
+    
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    
+    return new_user
 
-# UC9-1 - Quên mật khẩu (gửi OTP)
-@router.post("/forgot-password")
-async def forgot_password(body: ForgotPasswordSchema, db: Session = Depends(get_db)) -> MessageResponse:
-    """Kiểm tra email, gửi mã OTP về email đã đăng ký"""
-
-# UC9-1 - Xác nhận OTP + đặt mật khẩu mới
-@router.post("/reset-password")
-async def reset_password(body: ResetPasswordSchema, db: Session = Depends(get_db)) -> MessageResponse:
-    """Xác thực OTP và cập nhật mật khẩu mới (đã hash)"""
+# đăng nhập 
+@router.post("/login", response_model=TokenResponse)
+async def login(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: Session = Depends(get_db)
+):
+    user = db.query(User).filter(User.username == form_data.username).first()
+    if not user or not verify_password(form_data.password, user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Sai tên đăng nhập hoặc mật khẩu",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    # Ký token với nội dung (sub) là user_id
+    access_token = create_access_token(data={"sub": str(user.user_id)})
+    return {"access_token": access_token, "token_type": "bearer"}
