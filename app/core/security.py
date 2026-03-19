@@ -5,13 +5,13 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
-from app.core.config import settings
-from app.database import get_db
-from app.models.domain_models import User
+from core.config import settings
+from database import get_db
+from models.domain_models import User
 
 # Hàm băm và xác thực mật khẩu 
 
-pwd_context = CryptContext(schema=["brypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 def get_password_hash(password: str) -> str:
@@ -29,12 +29,12 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
         expire = datetime.now(timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
 
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, key=settings.SECRET_KEY, algorithm=[settings.ALGORITHM])
+    encoded_jwt = jwt.encode(to_encode, key=settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     return encoded_jwt
 
 def verify_token(token: str) -> dict:
     try:
-        payload = jwt.decode(token, key=settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        payload = jwt.decode(token, key=settings.SECRET_KEY, algorithms=settings.ALGORITHM)
         return payload
     except JWTError:
         raise HTTPException(

@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.routers import auth
+from routers import auth
 app = FastAPI()
 
 @app.get("/")

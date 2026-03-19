@@ -95,7 +95,7 @@ class DeviceCreateUpdate(BaseModel):
     light_max: Optional[int] = None
 
 class DeviceResponse(DeviceCreateUpdate):
-    device_id: str
+    device_id: int
     pump_status: bool
     fan_status: bool
     last_seen: Optional[datetime]
@@ -105,7 +105,7 @@ class DeviceResponse(DeviceCreateUpdate):
 # 5. SENSOR DATA VÀ ACTIVITY LOGS
 class SensorDataResponse(BaseModel):
     id: int
-    device_id: str
+    device_id: int
     temperature: float
     air_humidity: float
     soil_moisture: float
@@ -117,7 +117,7 @@ class SensorDataResponse(BaseModel):
 class ActivityLogResponse(BaseModel):
     id: int
     user_id: Optional[UUID]
-    device_id: Optional[str]
+    device_id: Optional[int]
     action_type: str
     description: Optional[str]
     created_at: datetime

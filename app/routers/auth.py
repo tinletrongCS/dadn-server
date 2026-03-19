@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from app.database import get_db
-from app.models.domain_models import User
-from app.schemas.domain_schemas import TokenResponse, MessageResponse, UserResponse, UserCreate
-from app.core.security import (
+from database import get_db
+from models.domain_models import User
+from schemas.domain_schemas import TokenResponse, MessageResponse, UserResponse, UserCreate
+from core.security import (
     verify_password, 
     create_access_token, 
     get_password_hash,
@@ -13,17 +13,15 @@ from app.core.security import (
 
 router = APIRouter()
 
-# dki
+# Đăng ký 
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def register_user(user_in: UserCreate, db: Session = Depends(get_db)):
     """Đăng ký tài khoản mới"""
-    # 1. Kiểm tra xem username hoặc email đã tồn tại chưa
     if db.query(User).filter(User.username == user_in.username).first():
         raise HTTPException(status_code=400, detail="Tên đăng nhập đã tồn tại")
     if db.query(User).filter(User.email == user_in.email).first():
-        raise HTTPException(status_code=400, detail="Email đã được sử dụng")
+        raise HTTPException(status_code=400, detail="Tài khoản email này đã được đăng ký")
     
-    # 2. Băm mật khẩu và tạo User mới
     new_user = User(
         username=user_in.username,
         email=user_in.email,
@@ -38,7 +36,7 @@ async def register_user(user_in: UserCreate, db: Session = Depends(get_db)):
     
     return new_user
 
-# đăng nhập 
+# Đăng nhập 
 @router.post("/login", response_model=TokenResponse)
 async def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
