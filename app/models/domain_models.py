@@ -37,8 +37,8 @@ class User(Base):
 class Device(Base):
     __tablename__ = "device"
 
-    device_id = Column(Integer, primary_key=True)
-    name = Column(String(100), nullable=False)
+    device_id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(100), nullable=False, unique=True)
     mode = Column(String(20), default='manual')
     pump_status = Column(Boolean, default=False)
     fan_status = Column(Boolean, default=False)
@@ -54,6 +54,7 @@ class Device(Base):
 
     sensor_data = relationship("SensorData", back_populates="device", cascade="all, delete-orphan")
     activity_logs = relationship("ActivityLog", back_populates="device", cascade="all, delete-orphan")
+    pending_commands = relationship("PendingCommand", back_populates="device", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<Device(id={self.device_id}, name={self.name!r})>"
@@ -118,3 +119,6 @@ class PendingCommand(Base):
     error_detail = Column(Text, nullable=True)
     issued_at = Column(TIMESTAMP(timezone=True), server_default=func.now())  
     acked_at = Column(TIMESTAMP(timezone=True), nullable=True)  
+
+    device = relationship("Device", back_populates="pending_commands")
+    issued_by_user = relationship("User")

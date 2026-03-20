@@ -17,11 +17,12 @@ class ICTBaseModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     @model_serializer(mode='wrap')
-    def serialize_datetime(self, value):
-        if isinstance(value, datetime):
-            return to_ict(value)
-        return value
-
+    def serialize_datetime(self, handler):
+        result = handler(self)
+        for key, val in result.items():
+            if isinstance(value, datetime):
+                result[key] = to_ict(val)
+        return result
 
 # 1. PAYLOAD TỪ MẠCH YOLOBIT
 class SensorDetail(BaseModel):
@@ -117,7 +118,9 @@ class DeviceResponse(ICTBaseModel, DeviceCreateUpdate):
     pump_status: bool
     fan_status: bool
     last_seen: Optional[datetime] = None
-    
+
+    model_config = ConfigDict(from_attributes=True)
+
 # 5. SENSOR DATA VÀ ACTIVITY LOGS
 class SensorDataResponse(ICTBaseModel):
     id: int
@@ -135,3 +138,30 @@ class ActivityLogResponse(ICTBaseModel):
     action_type: str
     description: Optional[str]
     created_at: datetime
+
+# 6. CONTROL
+class ControlCommandSchema(BaseModel):
+    action: str   # "on" | "off"
+
+    model_config = ConfigDict(
+        json_schema_extra={"example": {"action": "on"}}
+    )
+
+class ControlResponse(BaseModel):
+    device_id:  int
+    actuator:   str   # "pump" | "fan"
+    action:     str
+    status:     str   # "pending" | "done" | "error"
+    command_id: int
+
+class AckCommandSchema(BaseModel):
+    command_id:   int
+    success:      bool
+    error_detail: Optional[str] = None
+
+# 7. LOGS
+class PaginatedLogResponse(BaseModel):
+    items: List[ActivityLogResponse]
+    total: int
+    page:  int
+    limit: int
