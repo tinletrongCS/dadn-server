@@ -83,7 +83,7 @@ async def handle_payload(raw: str):
         db.refresh(record)
 
         # 5. Kiểm tra ngưỡng → cảnh báo → auto control
-        from app.services.threshold_service import check_and_alert
+        from services.threshold_service import check_and_alert
         await check_and_alert(device.device_id, record, device, db, ws_manager)
 
     except Exception as e:

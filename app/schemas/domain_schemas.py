@@ -20,7 +20,7 @@ class ICTBaseModel(BaseModel):
     def serialize_datetime(self, handler):
         result = handler(self)
         for key, val in result.items():
-            if isinstance(value, datetime):
+            if isinstance(val, datetime):
                 result[key] = to_ict(val)
         return result
 
