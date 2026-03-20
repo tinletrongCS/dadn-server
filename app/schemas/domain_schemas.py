@@ -1,6 +1,6 @@
 from datetime import datetime, timezone, timedelta
 from typing import Optional, List
-from pydantic import BaseModel, Field, ConfigDict, field_serializer
+from pydantic import BaseModel, Field, ConfigDict, model_serializer
 from uuid import UUID
 
 ICT = timezone(timedelta(hours=7))
@@ -16,7 +16,7 @@ def to_ict(dt: datetime) -> str:
 class ICTBaseModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    @field_serializer('*')
+    @model_serializer(mode='wrap')
     def serialize_datetime(self, value):
         if isinstance(value, datetime):
             return to_ict(value)
@@ -117,8 +117,7 @@ class DeviceResponse(ICTBaseModel, DeviceCreateUpdate):
     pump_status: bool
     fan_status: bool
     last_seen: Optional[datetime] = None
-
-
+    
 # 5. SENSOR DATA VÀ ACTIVITY LOGS
 class SensorDataResponse(ICTBaseModel):
     id: int

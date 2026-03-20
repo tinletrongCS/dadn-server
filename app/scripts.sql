@@ -14,8 +14,8 @@ CREATE TABLE "user" (
 
 -- 2. TẠO BẢNG DEVICE
 CREATE TABLE device (
-    device_id INTEGER PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
+    device_id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
     mode VARCHAR(20) DEFAULT 'manual',
     pump_status BOOLEAN DEFAULT FALSE,
     fan_status BOOLEAN DEFAULT FALSE,
@@ -33,7 +33,7 @@ CREATE TABLE device (
 -- 3. TẠO BẢNG SENSOR_DATA
 CREATE TABLE sensor_data (
     id BIGSERIAL PRIMARY KEY,
-    device_id integer REFERENCES device(device_id) ON DELETE CASCADE,
+    device_id SERIAL REFERENCES device(device_id) ON DELETE CASCADE,
     temperature FLOAT NOT NULL,
     air_humidity FLOAT NOT NULL,
     soil_moisture FLOAT NOT NULL,
@@ -46,7 +46,7 @@ CREATE TABLE sensor_data (
 CREATE TABLE activity_log (
     id BIGSERIAL PRIMARY KEY,
     user_id UUID REFERENCES "user"(user_id) ON DELETE SET NULL,
-    device_id integer REFERENCES device(device_id) ON DELETE CASCADE,
+    device_id SERIAL REFERENCES device(device_id) ON DELETE CASCADE,
     action_type VARCHAR(50) NOT NULL,
     description TEXT,
     created_at TIMESTAMP DEFAULT NOW()
@@ -70,7 +70,7 @@ CREATE INDEX idx_otp_tokens_email ON otp_tokens(email);
 -- 6. TẠO BẢNG PENDING COMMANDS
 CREATE TABLE pending_commands (
     command_id BIGSERIAL PRIMARY KEY,
-    device_id INTEGER NOT NULL REFERENCES device(device_id) ON DELETE CASCADE,
+    device_id SERIAL NOT NULL REFERENCES device(device_id) ON DELETE CASCADE,
     actuator VARCHAR(20) NOT NULL,
     action VARCHAR(10) NOT NULL,
     issued_by UUID REFERENCES "user"(user_id) ON DELETE SET NULL,

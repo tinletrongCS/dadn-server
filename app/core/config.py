@@ -14,6 +14,13 @@ class Settings(BaseSettings):
     SMTP_USER: str = ""
     SMTP_PASSWORD: str = ""
 
+    # Cấu hình tới Adafruit
+    AIO_USERNAME: str
+    AIO_KEY: str
+    AIO_FEED_SENSOR: str = "sensor-data"
+    AIO_FEED_PUMP: str = "pump-control"
+    AIO_FEED_FAN:  str = "fan-control"
+
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
 settings = Settings()

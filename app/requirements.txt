@@ -6,7 +6,7 @@ pydantic
 passlib[bcrypt]
 pydantic-settings
 python-dotenv
-
+aiomqtt==1.2.1
 python-jose[cryptography]
 passlib
 bcrypt==3.2.2
