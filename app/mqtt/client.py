@@ -14,11 +14,10 @@ from websocket.manager import ws_manager
 
 logger = logging.getLogger(__name__)
 
-# ── Thông tin kết nối Adafruit IO ────────────────────────
+# Thông tin kết nối Adafruit IO 
 AIO_HOST = "io.adafruit.com"
 AIO_PORT = 1883
 
-# ── Topic theo cấu trúc Adafruit ─────────────────────────
 def feed_topic(feed_key: str) -> str:
     return f"{settings.AIO_USERNAME}/feeds/{feed_key}"
 
@@ -27,7 +26,6 @@ TOPIC_PUMP   = feed_topic(settings.AIO_FEED_PUMP)
 TOPIC_FAN    = feed_topic(settings.AIO_FEED_FAN)
 
 
-# ── Xử lý payload nhận từ Adafruit ───────────────────────
 async def handle_payload(raw: str):
     """Parse JSON từ Adafruit, lưu DB, kiểm tra ngưỡng."""
     try:
@@ -46,11 +44,10 @@ async def handle_payload(raw: str):
         if not device:
             logger.warning(
                 f"[MQTT] device_source '{data.device_source}' "
-                f"chưa đăng ký trong DB — bỏ qua"
+                f"chưa đăng ký trong DB - bỏ qua"
             )
             return
 
-        # 2. Lưu sensor_data
         record = SensorData(
             device_id       = device.device_id,
             temperature     = data.sensor.temperature.value,
@@ -61,7 +58,6 @@ async def handle_payload(raw: str):
         )
         db.add(record)
 
-        # 3. Cập nhật trạng thái thực tế của device
         device.pump_status = data.status.pump
         device.fan_status  = data.status.fan
         device.mode        = data.status.mode
@@ -82,7 +78,7 @@ async def handle_payload(raw: str):
         db.commit()
         db.refresh(record)
 
-        # 5. Kiểm tra ngưỡng → cảnh báo → auto control
+        # 5. Kiểm tra ngưỡng cảnh báo auto control
         from services.threshold_service import check_and_alert
         await check_and_alert(device.device_id, record, device, db, ws_manager)
 
@@ -93,7 +89,6 @@ async def handle_payload(raw: str):
         db.close()
 
 
-# ── Subscribe loop — chạy suốt vòng đời app ──────────────
 async def mqtt_subscribe_loop():
     """
     Kết nối Adafruit IO, subscribe feed cảm biến.
@@ -125,7 +120,7 @@ async def mqtt_subscribe_loop():
             await asyncio.sleep(10)
 
 
-# ── Publish lệnh điều khiển xuống thiết bị ───────────────
+# Publish lệnh điều khiển xuống thiết bị 
 async def publish_command(feed_key: str, value: str):
     """
     Publish lệnh lên Adafruit feed.

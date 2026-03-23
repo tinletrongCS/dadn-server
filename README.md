@@ -83,21 +83,35 @@ docker-compose up -d --build
 ## Cấu trúc các module chính trong dự án 
 ```bash
 app/
-├── core/                  # Thư mục chứa cấu hình lõi
-│   ├── security.py        # Xử lý băm mật khẩu, tạo Token JWT
-│   └── config.py          # Chứa các biến môi trường (SECRET_KEY, DB_URL)
-├── models/                # Thư mục chứa cấu trúc Bảng DB (SQLAlchemy)
-│   └── domain_models.py   # Bảng User, Device, SensorData, ActivityLog
-├── schemas/               # Thư mục chứa cấu trúc JSON
-│   └── domain_schemas.py  # Validate dữ liệu đầu vào/đầu ra
-├── routers/               # Chứa các API
-│   ├── auth.py            # API Đăng nhập (Module 5)
-│   ├── devices.py         # API CRUD Thiết bị & Cài ngưỡng (Module 5 & 2)
-│   ├── sensors.py         # API Nhận & Trả dữ liệu môi trường (Module 1)
-│   ├── control.py         # API Bật/tắt thủ công & Tự động (Module 3)
-│   └── logs.py            # API Xem lịch sử hoạt động (Module 4)
-├── database.py            # Khởi tạo kết nối Neon.tech
-├── main.py                # Khởi chạy app và nhúng các router vào
-├── requirements.txt       
-└── docker-compose.yml
+├── docker-compose.yml
+├── Dockerfile
+├── requirements.txt
+├── dependencies.py
+├── scripts.sql
+├── database.py
+├── main.py
+├── core
+│   ├── config.py
+│   └── security.py
+├── dependencies
+│   └── auth_deps.py
+├── models
+│   └── domain_models.py
+├── mqtt
+│   └── client.py
+├── routers
+│   ├── auth.py
+│   ├── control.py
+│   ├── devices.py
+│   ├── logs.py
+│   ├── sensors.py
+│   └── ws.py
+├── schemas
+│   └── domain_schemas.py
+├── services
+│   ├── control_service.py
+│   ├── notification_service.py
+│   └── threshold_service.py
+└── websocket
+    └── manager.py
 ```
