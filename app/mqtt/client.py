@@ -37,9 +37,7 @@ async def handle_payload(raw: str):
     db: Session = SessionLocal()
     try:
         # 1. Tìm device theo name (map với device_source)
-        device = db.query(Device).filter(
-            Device.name == data.device_source
-        ).first()
+        device = db.query(Device).filter(Device.name == data.device_source).first()
 
         if not device:
             logger.warning(
@@ -106,10 +104,11 @@ async def mqtt_subscribe_loop():
                 await client.subscribe(TOPIC_SENSOR)
                 logger.info(f"[MQTT] Subscribed: {TOPIC_SENSOR}")
 
-                async for message in client.messages:
-                    raw = message.payload.decode()
-                    logger.debug(f"[MQTT] Nhận: {raw}")
-                    await handle_payload(raw)
+                async with client.messages() as messages:
+                    async for message in messages:
+                        raw = message.payload.decode()
+                        logger.info(f"[MQTT] Nhận: {raw}")
+                        await handle_payload(raw)
 
         except aiomqtt.MqttError as e:
             logger.warning(f"[MQTT] Mất kết nối: {e} — thử lại sau 5s")
@@ -125,7 +124,7 @@ async def publish_command(feed_key: str, value: str):
     """
     Publish lệnh lên Adafruit feed.
     Gọi từ /control endpoints khi user bấm bật/tắt.
-    value: "ON" hoặc "OFF"
+    value: "True" hoặc "False"
     """
     topic = feed_topic(feed_key)
     try:

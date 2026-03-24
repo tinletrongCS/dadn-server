@@ -17,9 +17,10 @@ class Settings(BaseSettings):
     # Cấu hình tới Adafruit
     AIO_USERNAME: str
     AIO_KEY: str
-    AIO_FEED_SENSOR: str = "sensor-data"
-    AIO_FEED_PUMP: str = "pump-control"
-    AIO_FEED_FAN:  str = "fan-control"
+    AIO_FEED_SENSOR: str = "bbc-sensor"
+    AIO_FEED_PUMP: str = "BBC-PUMP"
+    AIO_FEED_FAN:  str = "BBC-FAN"
+    AIO_FEED_MODE: str = "BBC-MODE"
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 

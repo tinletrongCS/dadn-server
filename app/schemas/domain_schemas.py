@@ -44,7 +44,8 @@ class Status(BaseModel):
 
 class DevicePayload(BaseModel):
     device_source: str = Field(..., alias="device_source")
-    timestamp: datetime
+    # timestamp: datetime
+    timestamp: Optional[datetime] = Field(default_factory=lambda: datetime.now(timezone.utc))
     sensor: Sensors
     status: Status
 

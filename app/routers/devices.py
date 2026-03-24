@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from database import get_db
 from models.domain_models import Device, ActivityLog, User
 from dependencies.auth_deps import get_current_user, require_admin, get_device_or_404
-from schemas.domain_schemas import DeviceResponse, MessageResponse
+from schemas.domain_schemas import DeviceResponse, MessageResponse, DeviceCreateUpdate
 
 router = APIRouter()
 
@@ -14,6 +14,14 @@ class DeviceCreate(BaseModel):
     device_id: str 
     name: str
     mode: Optional[str] = "manual"
+    temp_min: Optional[float] = None
+    temp_max: Optional[float] = None
+    humid_min: Optional[float] = None
+    humid_max: Optional[float] = None
+    soil_min: Optional[float] = None
+    soil_max: Optional[float] = None
+    light_min: Optional[int] = None
+    light_max: Optional[int] = None
 
 class DeviceUpdate(BaseModel):
     name: str
@@ -54,11 +62,11 @@ async def get_all_devices(db: Session = Depends(get_db), current_user: User = De
 # 2. Thêm thiết bị mới (UC10B) - CHỈ ADMIN
 @router.post("", response_model=DeviceResponse, status_code=status.HTTP_201_CREATED)
 async def create_device(
-    device_in: DeviceCreate, 
+    device_in: DeviceCreateUpdate, 
     db: Session = Depends(get_db), 
     current_user: User = Depends(require_admin)
 ):
-    if db.query(Device).filter(Device.device_id == device_in.device_id).first():
+    if db.query(Device).filter(Device.name == device_in.name).first():
         raise HTTPException(status_code=400, detail="Mã thiết bị này đã tồn tại")
     
     new_device = Device(**device_in.model_dump())
