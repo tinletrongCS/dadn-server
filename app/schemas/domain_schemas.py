@@ -122,6 +122,13 @@ class DeviceResponse(ICTBaseModel, DeviceCreateUpdate):
 
     model_config = ConfigDict(from_attributes=True)
 
+class DeviceStatusResponse(BaseModel):
+    device_id: int
+    mode: str
+    pump_status: bool
+    fan_status: bool
+    last_seen: Optional[datetime] = None
+    
 # 5. SENSOR DATA VÀ ACTIVITY LOGS
 class SensorDataResponse(ICTBaseModel):
     id: int
@@ -142,7 +149,7 @@ class ActivityLogResponse(ICTBaseModel):
 
 # 6. CONTROL
 class ControlCommandSchema(BaseModel):
-    action: str   # "on" | "off"
+    action: str   # "True" | "False"
 
     model_config = ConfigDict(
         json_schema_extra={"example": {"action": "on"}}

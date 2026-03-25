@@ -28,7 +28,7 @@ async def require_admin(current_user: User = Depends(get_current_user)) -> User:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Không đủ quyền truy cập. Yêu cầu quyền Admin.")
     return current_user
 
-
+# dùng kiểm tra thiết bị từ device_id có tồn tại hay không 
 async def get_device_or_404(device_id: str, db: Session = Depends(get_db)) -> Device:
     device = db.query(Device).filter(Device.device_id == device_id).first()
     if not device:

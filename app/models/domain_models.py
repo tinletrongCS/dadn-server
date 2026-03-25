@@ -122,3 +122,21 @@ class PendingCommand(Base):
 
     device = relationship("Device", back_populates="pending_commands")
     issued_by_user = relationship("User")
+
+class UserDevice(Base):
+    __tablename__ = "user_device"
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    user_id = Column(PG_UUID(as_uuid=True), ForeignKey("user.user_id"), unique=True, nullable=False)
+    device_id = Column(Integer, ForeignKey("device.device_id"), unique=True, nullable=False)
+    
+    # Hiện máy đang có ai dùng không 
+    is_active = Column(Boolean, default=False) 
+    temp_min = Column(Float, nullable=True)
+    temp_max = Column(Float, nullable=True)
+    humid_min = Column(Float, nullable=True)
+    humid_max = Column(Float, nullable=True)
+    soil_min = Column(Float, nullable=True)
+    soil_max = Column(Float, nullable=True)
+    light_min = Column(Integer, nullable=True)
+    light_max = Column(Integer, nullable=True)

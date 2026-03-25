@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from database import get_db
-from dependencies.auth_deps import get_current_user
+from dependencies.auth_deps import get_current_user, get_device_or_404
 from models.domain_models import User, Device, PendingCommand
 from schemas.domain_schemas import (
     ControlCommandSchema,
@@ -161,8 +161,7 @@ async def _manual_control(
     device_id:    int,
     body:         ControlCommandSchema,
     db:           Session,
-    current_user: User,
-) -> ControlResponse:
+    current_user: User,) -> ControlResponse:
 
     # Kiểm tra device tồn tại
     device = db.query(Device).filter(
@@ -172,7 +171,7 @@ async def _manual_control(
         raise HTTPException(status_code=404, detail="Thiết bị không tồn tại")
 
     # Cảnh báo nếu đang ở auto mode
-    if device.mode == "auto":
+    if device.mode == "auto" or device.mode == "AUTO":
         raise HTTPException(
             status_code=409,
             detail=(
@@ -218,14 +217,14 @@ async def _manual_control(
         action_type=f"MANUAL_CONTROL_{actuator.upper()}",
         description=(
             f"{current_user.username} "
-            f"{'bật' if body.action == 'on' else 'tắt'} {actuator} thủ công"
+            f"{'bật' if body.action == 'True' else 'tắt'} {'quạt' if actuator == 'fan' else 'máy bơm'} thủ công"
         ),
+
     )
 
-    # Publish MQTT lên Adafruit feed
+    # Publish MQTT lên Adafruit feed - lấy cái feed_key ở trên 
     try:
-        feed_key = f"{actuator}-control"
-        await publish_command(feed_key, body.action.upper())
+        await publish_command(feed_key, body.action)
     except Exception as e:
         raise HTTPException(
             status_code=502,

@@ -39,22 +39,7 @@ docker compose down
 
 ---
 
-## Local 
 
-1. Tạo venv:
-```bash
-python -m venv venv
-venv\Scripts\activate
-```
-2. Cài dependency:
-```bash
-pip install -r app/requirements.txt
-```
-3. Chạy app:
-```bash
-cd app
-uvicorn main:app --reload
-```
 
 ---
 

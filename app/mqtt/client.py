@@ -13,8 +13,6 @@ from schemas.domain_schemas import DevicePayload
 from websocket.manager import ws_manager
 
 logger = logging.getLogger(__name__)
-
-# Thông tin kết nối Adafruit IO 
 AIO_HOST = "io.adafruit.com"
 AIO_PORT = 1883
 
@@ -24,7 +22,7 @@ def feed_topic(feed_key: str) -> str:
 TOPIC_SENSOR = feed_topic(settings.AIO_FEED_SENSOR)
 TOPIC_PUMP   = feed_topic(settings.AIO_FEED_PUMP)
 TOPIC_FAN    = feed_topic(settings.AIO_FEED_FAN)
-
+TOPIC_MODE = feed_topic(settings.AIO_FEED_MODE)
 
 async def handle_payload(raw: str):
     """Parse JSON từ Adafruit, lưu DB, kiểm tra ngưỡng."""
@@ -61,8 +59,9 @@ async def handle_payload(raw: str):
         device.mode        = data.status.mode
         device.last_seen   = data.timestamp
 
-        # 4. Cập nhật ngưỡng — chỉ ghi nếu DB đang NULL
-        #    (ưu tiên cài đặt từ Frontend, không ghi đè)
+        """
+        Cập nhật các ngưỡng MIN/MAX do người dùng tùy chỉnh 
+        """
         s = data.sensor
         if device.temp_min  is None: device.temp_min  = s.temperature.MIN
         if device.temp_max  is None: device.temp_max  = s.temperature.MAX
@@ -76,7 +75,6 @@ async def handle_payload(raw: str):
         db.commit()
         db.refresh(record)
 
-        # 5. Kiểm tra ngưỡng cảnh báo auto control
         from services.threshold_service import check_and_alert
         await check_and_alert(device.device_id, record, device, db, ws_manager)
 
@@ -121,11 +119,6 @@ async def mqtt_subscribe_loop():
 
 # Publish lệnh điều khiển xuống thiết bị 
 async def publish_command(feed_key: str, value: str):
-    """
-    Publish lệnh lên Adafruit feed.
-    Gọi từ /control endpoints khi user bấm bật/tắt.
-    value: "True" hoặc "False"
-    """
     topic = feed_topic(feed_key)
     try:
         async with aiomqtt.Client(
@@ -135,7 +128,7 @@ async def publish_command(feed_key: str, value: str):
             password = settings.AIO_KEY,
         ) as client:
             await client.publish(topic, payload=value)
-            logger.info(f"[MQTT] Published → {topic}: {value}")
+            logger.warning(f"[MQTT] Published → {topic}: {value}")
     except aiomqtt.MqttError as e:
         logger.error(f"[MQTT] Publish thất bại: {e}")
         raise

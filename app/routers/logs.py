@@ -14,7 +14,7 @@ from schemas.domain_schemas import ActivityLogResponse, PaginatedLogResponse
 router = APIRouter()
 
 
-# ── UC8 + UC8A: Xem & lọc lịch sử hoạt động ─────────────
+# UC8 + UC8A: Xem & lọc lịch sử hoạt động 
 @router.get("", response_model=PaginatedLogResponse)
 async def get_logs(
     device_id:   Optional[int]      = Query(None, description="Lọc theo thiết bị"),
@@ -42,7 +42,6 @@ async def get_logs(
             (ActivityLog.user_id == None)
         )
 
-    # Filter
     if device_id is not None:
         query = query.filter(ActivityLog.device_id == device_id)
     if action_type:
@@ -52,10 +51,8 @@ async def get_logs(
     if to_time:
         query = query.filter(ActivityLog.created_at <= to_time)
 
-    # Tổng số bản ghi
     total = query.count()
 
-    # Phân trang
     items = (
         query
         .order_by(ActivityLog.created_at.desc())
