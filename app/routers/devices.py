@@ -158,7 +158,7 @@ async def change_mode(
     device.mode = mode_in.mode.lower()
     db.commit()
     db.refresh(device)
-    log_activity(db, current_user.user_id, device_id, "MODE_CHANGE", f"Chuyển chế độ sang {device.mode}")
+    log_activity(db, current_user.user_id, device_id, "MODE_CHANGE", f"Người dùng {current_user.full_name} chuyển chế độ sang {device.mode}")
     try:
         await publish_command(settings.AIO_FEED_MODE, mode_in.mode)
     except Exception as e:

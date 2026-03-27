@@ -38,7 +38,8 @@ def _is_violated(value: float, mn, mx) -> str | None:
     return None
 
 
-# ── So sánh toàn bộ sensor với ngưỡng của device ─────────
+# So sánh toàn bộ sensor với ngưỡng của device
+# ->> đổi lại: so sánh với ngưỡng của người dùng hiện tại đang đăng nhập vào dùng t/bị 
 def _detect_violations(device: Device, record: SensorData) -> list[tuple]:
     """
     Trả về list các (field, value, 'min'|'max') bị vi phạm.
@@ -80,9 +81,15 @@ async def check_and_alert(
 
     for field, value, vtype in violations:
         action_type = f"ALERT_{field.upper()}"
+        # description = (
+        #     f"{field} = {value} vượt ngưỡng "
+        #     f"{'tối thiểu' if vtype == 'min' else 'tối đa'}"
+        # )
+
         description = (
-            f"{field} = {value} vượt ngưỡng "
-            f"{'tối thiểu' if vtype == 'min' else 'tối đa'}"
+            f"{field}"
+            f"{'quá thấp' if vtype == 'min' else 'quá cao'}"
+            f" so với ngưỡng {'tối thiểu' if vtype == 'min' else 'tối đa'}"
         )
 
         # UC7: Ghi log

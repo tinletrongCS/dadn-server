@@ -10,6 +10,7 @@ from core.config import settings
 from database import SessionLocal
 from models.domain_models import Device, SensorData
 from schemas.domain_schemas import DevicePayload
+from services.threshold_service import check_and_alert
 from websocket.manager import ws_manager
 
 logger = logging.getLogger(__name__)
@@ -34,7 +35,6 @@ async def handle_payload(raw: str):
 
     db: Session = SessionLocal()
     try:
-        # 1. Tìm device theo name (map với device_source)
         device = db.query(Device).filter(Device.name == data.device_source).first()
 
         if not device:
@@ -75,7 +75,6 @@ async def handle_payload(raw: str):
         db.commit()
         db.refresh(record)
 
-        from services.threshold_service import check_and_alert
         await check_and_alert(device.device_id, record, device, db, ws_manager)
 
     except Exception as e:
@@ -92,7 +91,7 @@ async def mqtt_subscribe_loop():
     """
     while True:
         try:
-            logger.info("[MQTT] Đang kết nối tới Adafruit IO...")
+            logger.warning("[MQTT] Đang kết nối tới Adafruit IO...")
             async with aiomqtt.Client(
                 hostname = AIO_HOST,
                 port     = AIO_PORT,
@@ -117,7 +116,7 @@ async def mqtt_subscribe_loop():
             await asyncio.sleep(10)
 
 
-# Publish lệnh điều khiển xuống thiết bị 
+# Publish lệnh điều khiển thiết bị tới ADA  
 async def publish_command(feed_key: str, value: str):
     topic = feed_topic(feed_key)
     try:
