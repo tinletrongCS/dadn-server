@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from models.domain_models import Device, SensorData, ActivityLog
 from websocket.manager import ConnectionManager
+from repositories import log_repository
 
 logger = logging.getLogger(__name__)
 
@@ -17,15 +18,7 @@ def write_log(
     action_type: str,
     description: str
 ) -> ActivityLog:
-    log = ActivityLog(
-        user_id=user_id,
-        device_id=device_id,
-        action_type=action_type,
-        description=description,
-    )
-    db.add(log)
-    db.commit()
-    return log
+    return log_repository.create(db, user_id, device_id, action_type, description)
 
 
 # Kiểm tra một cặp min/max 
@@ -40,16 +33,22 @@ def _is_violated(value: float, mn, mx) -> str | None:
 
 # So sánh toàn bộ sensor với ngưỡng của device
 # ->> đổi lại: so sánh với ngưỡng của người dùng hiện tại đang đăng nhập vào dùng t/bị 
-def _detect_violations(device: Device, record: SensorData) -> list[tuple]:
+def _detect_violations(device: Device, record: SensorData, active_record=None) -> list[tuple]:
     """
     Trả về list các (field, value, 'min'|'max') bị vi phạm.
     Ví dụ: [("temperature", 38.5, "max"), ("soil_moisture", 12.0, "min")]
     """
+    def get_threshold(field_name):
+        # Lấy từ active_record nếu có, nếu không thì fallback về device
+        if active_record and getattr(active_record, field_name) is not None:
+            return getattr(active_record, field_name)
+        return getattr(device, field_name)
+
     checks = [
-        ("temperature",     record.temperature,     device.temp_min,  device.temp_max),
-        ("air_humidity",    record.air_humidity,     device.humid_min, device.humid_max),
-        ("soil_moisture",   record.soil_moisture,    device.soil_min,  device.soil_max),
-        ("light_intensity", record.light_intensity,  device.light_min, device.light_max),
+        ("temperature",     record.temperature,     get_threshold("temp_min"),  get_threshold("temp_max")),
+        ("air_humidity",    record.air_humidity,     get_threshold("humid_min"), get_threshold("humid_max")),
+        ("soil_moisture",   record.soil_moisture,    get_threshold("soil_min"),  get_threshold("soil_max")),
+        ("light_intensity", record.light_intensity,  get_threshold("light_min"), get_threshold("light_max")),
     ]
     violations = []
     for field, value, mn, mx in checks:
@@ -74,7 +73,10 @@ async def check_and_alert(
       2. Push ALERT qua WebSocket tới Frontend
       3. Nếu mode='auto' -> gọi auto_control()
     """
-    violations = _detect_violations(device, record)
+    from repositories import user_device_repository
+    active_record = user_device_repository.get_active_global_for_device(db, device_id)
+    
+    violations = _detect_violations(device, record, active_record)
 
     if not violations:
         return  # tất cả trong ngưỡng an toàn

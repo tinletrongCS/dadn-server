@@ -2,27 +2,18 @@
 
 import logging
 from sqlalchemy.orm import Session
+from fastapi import HTTPException
 
-from models.domain_models import Device, PendingCommand, ActivityLog
-from websocket.manager import ConnectionManager
-from services.threshold_service import write_log
+from models.domain_models import Device, User
+from schemas.domain_schemas import ControlCommandSchema, ControlResponse, AckCommandSchema, MessageResponse
+from websocket.manager import ConnectionManager, ws_manager
+from repositories import device_repository, command_repository, log_repository
+from core.config import settings
+from mqtt.client import publish_command
 
 logger = logging.getLogger(__name__)
 
-
-# ── Ánh xạ violation → lệnh actuator ─────────────────────
-def _decide_commands(
-    device:     Device,
-    violations: list[tuple]
-) -> list[tuple[str, str]]:
-    """
-    Trả về list (actuator, action) cần thực thi.
-    Logic mặc định:
-      soil_moisture < min  → bật bơm (pump on)
-      soil_moisture > max  → tắt bơm (pump off)
-      temperature   > max  → bật quạt (fan on)
-      temperature   < min  → tắt quạt (fan off)
-    """
+def _decide_commands(device: Device, violations: list[tuple]) -> list[tuple[str, str]]:
     commands = []
     for field, value, vtype in violations:
         if field == "soil_moisture":
@@ -32,57 +23,145 @@ def _decide_commands(
     return commands
 
 
-# ── Điều khiển tự động (UC6) ──────────────────────────────
+# Điều khiển thủ công (UC5)
+async def manual_control(
+    actuator: str,
+    device_id: int,
+    body: ControlCommandSchema,
+    db: Session,
+    current_user: User
+) -> ControlResponse:
+    device = device_repository.get_by_id(db, device_id)
+    if not device:
+        raise HTTPException(status_code=404, detail="Thiết bị không tồn tại")
+
+    if device.mode == "auto" or device.mode == "AUTO":
+        raise HTTPException(
+            status_code=409,
+            detail="Thiết bị đang ở chế độ tự động. Chuyển sang manual trước khi điều khiển thủ công.",
+        )
+
+    if body.action not in ("True", "False"):
+        raise HTTPException(status_code=422, detail="action phải là 'True' hoặc 'False'")
+    
+    is_active = (body.action == "True")
+
+    if actuator == "pump":
+        device.pump_status = is_active
+        feed_key = settings.AIO_FEED_PUMP
+    else:
+        device.fan_status = is_active
+        feed_key = settings.AIO_FEED_FAN 
+        
+    cmd = command_repository.create(db, device_id, actuator, body.action, current_user.user_id, "manual")
+
+    log_repository.create(
+        db=db,
+        user_id=current_user.user_id,
+        device_id=device_id,
+        action_type=f"MANUAL_CONTROL_{actuator.upper()}",
+        description=(f"{current_user.username} {'bật' if body.action == 'True' else 'tắt'} {'quạt' if actuator == 'fan' else 'máy bơm'} thủ công"),
+    )
+
+    try:
+        await publish_command(feed_key, body.action)
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Gửi lệnh tới thiết bị thất bại: {e}")
+
+    await ws_manager.broadcast({
+        "type":       "STATE_UPDATE",
+        "device_id":  device_id,
+        "actuator":   actuator,
+        "action":     body.action,
+        "source":     "manual",
+        "command_id": cmd.command_id,
+    })
+
+    return ControlResponse(
+        device_id=device_id,
+        actuator=actuator,
+        action=body.action,
+        status="pending",
+        command_id=cmd.command_id,
+    )
+
+
+# Lấy lệnh chưa xử lý (UC6)
+def get_pending_commands(db: Session, device_id: int) -> list:
+    commands = command_repository.get_pending(db, device_id)
+    return [
+        {
+            "command_id": cmd.command_id,
+            "actuator":   cmd.actuator,
+            "action":     cmd.action,
+            "source":     cmd.source,
+            "issued_at":  cmd.issued_at,
+        }
+        for cmd in commands
+    ]
+
+
+# Xác nhận lệnh (UC6 / UC6-1) 
+async def acknowledge_command(db: Session, device_id: int, body: AckCommandSchema) -> MessageResponse:
+    cmd = command_repository.get_by_id(db, body.command_id, device_id)
+    if not cmd:
+        raise HTTPException(status_code=404, detail="Lệnh không tồn tại")
+
+    if body.success:
+        device = device_repository.get_by_id(db, device_id)
+        command_repository.mark_done(db, cmd, device)
+
+        log_repository.create(
+            db=db,
+            user_id=None,
+            device_id=device_id,
+            action_type=f"AUTO_CONTROL_{cmd.actuator.upper()}",
+            description=f"Thiết bị xác nhận {cmd.action} {cmd.actuator} thành công",
+        )
+
+        await ws_manager.broadcast({
+            "type":      "STATE_UPDATE",
+            "device_id": device_id,
+            "actuator":  cmd.actuator,
+            "status":    cmd.action == "on",
+        })
+
+        return MessageResponse(message="Xác nhận thành công")
+    else:
+        command_repository.mark_error(db, cmd, body.error_detail)
+
+        await emergency_alert(
+            device_id=device_id,
+            error_detail=body.error_detail or "Thiết bị báo lỗi không xác định",
+            db=db,
+            ws_manager=ws_manager,
+        )
+        return MessageResponse(message="Đã ghi nhận lỗi và phát cảnh báo")
+
+
+# Điều khiển tự động (UC6)
 async def auto_control(
     device_id:  int,
     violations: list[tuple],
     db:         Session,
     ws_manager: ConnectionManager,
 ) -> None:
-    """
-    UC6: Tự động bật/tắt actuator khi phát hiện vi phạm ngưỡng.
-    Flow:
-      1. Quyết định lệnh từ violations
-      2. Kiểm tra trạng thái hiện tại tránh spam
-      3. INSERT pending_commands
-      4. Ghi ActivityLog (UC6A)
-      5. Push STATE_UPDATE qua WebSocket (UC6B)
-      6. Publish MQTT lên Adafruit feed
-    """
-    device = db.query(Device).filter(
-        Device.device_id == device_id
-    ).first()
+    device = device_repository.get_by_id(db, device_id)
     if not device:
         return
 
     commands = _decide_commands(device, violations)
 
     for actuator, action in commands:
-        # Kiểm tra thiết bị đã đúng trạng thái chưa → tránh spam
         current_status = getattr(device, f"{actuator}_status")
         desired_status = (action == "on")
         if current_status == desired_status:
-            logger.info(
-                f"[AUTO] {actuator} đã ở trạng thái {action} "
-                f"— bỏ qua lệnh trùng lặp"
-            )
+            logger.info(f"[AUTO] {actuator} đã ở trạng thái {action} - bỏ qua lệnh trùng lặp")
             continue
 
-        # INSERT pending_commands
-        cmd = PendingCommand(
-            device_id=device_id,
-            actuator=actuator,
-            action=action,
-            issued_by=None,      # hệ thống tự động
-            source="auto",
-            status="pending",
-        )
-        db.add(cmd)
-        db.commit()
-        db.refresh(cmd)
+        cmd = command_repository.create(db, device_id, actuator, action, None, "auto")
 
-        # UC6A: Ghi ActivityLog
-        write_log(
+        log_repository.create(
             db=db,
             user_id=None,
             device_id=device_id,
@@ -90,7 +169,6 @@ async def auto_control(
             description=f"Tự động {action} {actuator} do vượt ngưỡng",
         )
 
-        # UC6B: Push STATE_UPDATE lên WebSocket
         await ws_manager.broadcast({
             "type":      "STATE_UPDATE",
             "device_id": device_id,
@@ -100,36 +178,24 @@ async def auto_control(
             "command_id": cmd.command_id,
         })
 
-        # Publish MQTT lên Adafruit feed
         try:
-            from mqtt.client import publish_command
-            feed_key = f"{actuator}-control"   # pump-control | fan-control
+            feed_key = f"{actuator}-control"
             await publish_command(feed_key, action.upper())
         except Exception as e:
             logger.error(f"[AUTO] Publish MQTT thất bại: {e}")
             await emergency_alert(device_id, str(e), db, ws_manager)
 
-        logger.info(
-            f"[AUTO] Đã gửi lệnh {action.upper()} → {actuator} "
-            f"(command_id={cmd.command_id})"
-        )
+        logger.info(f"[AUTO] Đã gửi lệnh {action.upper()} -> {actuator} (command_id={cmd.command_id})")
 
 
-# ── Cảnh báo lỗi khẩn cấp (UC6-1) ───────────────────────
+# Cảnh báo lỗi khẩn cấp (UC6-1)
 async def emergency_alert(
     device_id:    int,
     error_detail: str,
     db:           Session,
     ws_manager:   ConnectionManager,
 ) -> None:
-    """
-    UC6-1: Broadcast EMERGENCY khi lệnh điều khiển thất bại.
-    Được gọi từ:
-      - auto_control() khi publish MQTT lỗi
-      - POST /control/{id}/ack khi thiết bị báo thất bại
-    """
-    # Ghi log lỗi
-    write_log(
+    log_repository.create(
         db=db,
         user_id=None,
         device_id=device_id,
@@ -137,7 +203,6 @@ async def emergency_alert(
         description=error_detail,
     )
 
-    # Broadcast EMERGENCY tới toàn bộ client WebSocket
     await ws_manager.broadcast({
         "type":         "EMERGENCY",
         "device_id":    device_id,
@@ -145,4 +210,4 @@ async def emergency_alert(
         "message":      f"Không thể điều khiển thiết bị {device_id}: {error_detail}",
     })
 
-    logger.error(f"[EMERGENCY] device_id={device_id} — {error_detail}")
+    logger.error(f"[EMERGENCY] device_id={device_id} --- {error_detail}")

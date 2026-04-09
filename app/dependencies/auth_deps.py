@@ -37,3 +37,26 @@ async def get_device_or_404(device_id: str, db: Session = Depends(get_db)) -> De
             detail=f"Không tìm thấy thiết bị mang mã {device_id}"
         )
     return device
+
+# Đảm bảo rằng người dùng hiện tại nếu muốn thao tác thì phải có quyền admin 
+# hoặc đã lựa chọn thiết bị này trước đó 
+async def require_active_device(
+    device_id: int,
+    current_user: User = Depends(get_current_user),
+    db:  Session = Depends(get_db)
+) -> Device:
+    """Dependency đảm bảo người dùng hiện tại đã chọn (active) thiết bị này."""
+    from repositories import user_device_repository
+    device = await get_device_or_404(str(device_id), db)
+
+    if current_user.role_id == 1:
+        return device
+
+    user_device = user_device_repository.get_by_user_and_device(db, current_user.user_id, device_id)
+    if not user_device or not user_device.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Bạn chưa chọn hoặc không có quyền thao tác trên thiết bị này"
+        )
+    return device
+

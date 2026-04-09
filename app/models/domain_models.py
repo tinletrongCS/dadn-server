@@ -9,6 +9,7 @@ from sqlalchemy import (
     Text,
     ForeignKey,
     func,
+    UniqueConstraint,
 )
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.ext.declarative import declarative_base
@@ -127,8 +128,12 @@ class UserDevice(Base):
     __tablename__ = "user_device"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    user_id = Column(PG_UUID(as_uuid=True), ForeignKey("user.user_id"), unique=True, nullable=False)
-    device_id = Column(Integer, ForeignKey("device.device_id"), unique=True, nullable=False)
+    user_id = Column(PG_UUID(as_uuid=True), ForeignKey("user.user_id"), nullable=False)
+    device_id = Column(Integer, ForeignKey("device.device_id"), nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint('user_id', 'device_id', name='uq_user_device'),
+    )
     
     # Hiện máy đang có ai dùng không 
     is_active = Column(Boolean, default=False) 

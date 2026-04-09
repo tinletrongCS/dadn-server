@@ -1,50 +1,31 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from database import get_db
+from schemas.domain_schemas import TokenResponse, UserResponse,UserResponseMe, UserCreate
+from services import auth_service
+from dependencies.auth_deps import get_current_user
 from models.domain_models import User
-from schemas.domain_schemas import TokenResponse, MessageResponse, UserResponse, UserCreate
-from core.security import verify_password, create_access_token, get_password_hash
-from dependencies.auth_deps import get_current_user, require_admin, get_device_or_404
+
 router = APIRouter()
 
 # Đăng ký 
+# Done
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def register_user(user_in: UserCreate, db: Session = Depends(get_db)):
-    """Đăng ký tài khoản mới"""
-    if db.query(User).filter(User.username == user_in.username).first():
-        raise HTTPException(status_code=400, detail="Tên đăng nhập đã tồn tại")
-    if db.query(User).filter(User.email == user_in.email).first():
-        raise HTTPException(status_code=400, detail="Tài khoản email này đã được đăng ký")
-    
-    new_user = User(
-        username=user_in.username,
-        email=user_in.email,
-        password_hash=get_password_hash(user_in.password),
-        full_name=user_in.full_name,
-        role_id=user_in.role_id
-    )
-    
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-    
-    return new_user
+    return await auth_service.register(db, user_in)
 
 # Đăng nhập 
+# Done
 @router.post("/login", response_model=TokenResponse)
 async def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db)
 ):
-    user = db.query(User).filter(User.username == form_data.username).first()
-    if not user or not verify_password(form_data.password, user.password_hash):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Sai tên đăng nhập hoặc mật khẩu",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    
-    # Ký token với nội dung (sub) là user_id
-    access_token = create_access_token(data={"sub": str(user.user_id)})
-    return {"access_token": access_token, "token_type": "bearer"}
+    return await auth_service.login(db, form_data.username, form_data.password)
+
+# Lấy thông tin user hiện tại - Khi bấm vào xem tài khoản 
+# Done 
+@router.get("/me", response_model=UserResponseMe)
+async def read_current_user(current_user: User = Depends(get_current_user)):
+    return current_user

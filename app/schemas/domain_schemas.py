@@ -100,6 +100,14 @@ class UserResponse(ICTBaseModel):
     is_active: bool
     created_at: datetime
 
+# /me
+class UserResponseMe(ICTBaseModel):
+    username: str
+    full_name: str
+    role_id: int
+    is_active: bool
+    created_at: datetime
+
 
 # 4. DEVICE
 class DeviceCreateUpdate(BaseModel):
@@ -113,6 +121,36 @@ class DeviceCreateUpdate(BaseModel):
     soil_max: Optional[float] = None
     light_min: Optional[int] = None
     light_max: Optional[int] = None
+
+class DeviceCreate(BaseModel):
+    device_id: str 
+    name: str
+    mode: Optional[str] = "manual"
+    temp_min: Optional[float] = None
+    temp_max: Optional[float] = None
+    humid_min: Optional[float] = None
+    humid_max: Optional[float] = None
+    soil_min: Optional[float] = None
+    soil_max: Optional[float] = None
+    light_min: Optional[int] = None
+    light_max: Optional[int] = None
+
+class DeviceUpdate(BaseModel):
+    name: str
+
+class ThresholdUpdate(BaseModel):
+    temp_min: Optional[float] = None
+    temp_max: Optional[float] = None
+    humid_min: Optional[float] = None
+    humid_max: Optional[float] = None
+    soil_min: Optional[float] = None
+    soil_max: Optional[float] = None
+    light_min: Optional[int] = None
+    light_max: Optional[int] = None
+
+class ModeUpdate(BaseModel):
+    mode: str
+
 
 class DeviceResponse(ICTBaseModel, DeviceCreateUpdate):
     device_id: int
