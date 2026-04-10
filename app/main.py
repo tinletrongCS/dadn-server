@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from database import Base, engine
 from mqtt.client import mqtt_subscribe_loop
-from routers import auth, devices, sensors, control, logs 
+from routers import auth, devices, sensors, control, logs, ws
 
 
 logging.basicConfig(level=logging.INFO)
@@ -49,3 +49,4 @@ app.include_router(devices.router, prefix="/devices", tags=["Devices"])
 app.include_router(sensors.router, prefix="/sensors", tags=["Sensors"])
 app.include_router(control.router, prefix="/control", tags=["Control"])
 app.include_router(logs.router, prefix="/logs", tags=["Logs"])
+app.include_router(ws.router, prefix="/ws", tags=["WebSocket"])

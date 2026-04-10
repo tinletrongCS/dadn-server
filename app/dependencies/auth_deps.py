@@ -45,18 +45,27 @@ async def require_active_device(
     current_user: User = Depends(get_current_user),
     db:  Session = Depends(get_db)
 ) -> Device:
-    """Dependency đảm bảo người dùng hiện tại đã chọn (active) thiết bị này."""
     from repositories import user_device_repository
     device = await get_device_or_404(str(device_id), db)
 
     if current_user.role_id == 1:
         return device
 
-    user_device = user_device_repository.get_by_user_and_device(db, current_user.user_id, device_id)
-    if not user_device or not user_device.is_active:
+    # Lấy ra phiên điều khiển của thiết bị này trên toàn hệ thống
+    active_session = user_device_repository.get_active_global_for_device(db, device_id)
+
+    # Nếu thiết bị đang có người dùng, nhưng lại KHÔNG PHẢI là người dùng hiện tại
+    if active_session and active_session.user_id != current_user.user_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Bạn chưa chọn hoặc không có quyền thao tác trên thiết bị này"
+            detail="Cảnh báo: Thiết bị này đang được điều khiển bởi một người khác"
+        )
+
+    # Nếu thiết bị chưa ai sử dụng, hoặc chính User này có bản ghi nhưng đang là False
+    if not active_session or active_session.user_id != current_user.user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Cảnh báo: Bạn cần lựa chọn thiết bị này trước khi thao tác"
         )
     return device
 

@@ -12,6 +12,7 @@ from services import log_service
 router = APIRouter()
 
 # UC8 + UC8A: Xem & lọc lịch sử hoạt động 
+# Done 
 @router.get("", response_model=PaginatedLogResponse)
 async def get_logs(
     device_id:   Optional[int]      = Query(None, description="Lọc theo thiết bị"),

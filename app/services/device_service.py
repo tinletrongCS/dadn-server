@@ -126,7 +126,7 @@ async def deselect_device(db: Session, device: Device, current_user: User) -> di
         )
     user_device_repository.set_active_status(db, user_device, False)
     
-    _log_action(db, current_user, device.device_id, "DEVICE_SELECTED", f"Người dùng {current_user.username} đã bỏ chọn thao tác thiết bị {device.name} ")
+    _log_action(db, current_user, device.device_id, "DEVICE_DESELECTED", f"Người dùng {current_user.username} đã bỏ chọn thao tác thiết bị {device.name} ")
     return {"message": f"Đã bỏ chọn thiết bị {device.name} thành công", "is_active": False}
 
 async def check_active_device(db: Session, device: Device, current_user: User) -> dict:

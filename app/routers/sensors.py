@@ -11,6 +11,7 @@ from services import sensor_service
 router = APIRouter()
 
 # UC1 - Thiết bị IoT gửi dữ liệu lên
+# Chưa dùng cái này 
 @router.post("/data", response_model=MessageResponse)
 async def receive_sensor_data(
     body: DevicePayload,
@@ -18,7 +19,8 @@ async def receive_sensor_data(
 ) -> MessageResponse:
     return await sensor_service.receive_data(db, body)
 
-# UC2 - Xem dữ liệu mới nhất của một thiết bị
+# UC2 - Xem dữ liệu mới nhất của một thiết bị -> lần gần nhất thiết bị gửi dữ liệu
+# Done 
 @router.get("/{device_id}/latest", response_model=SensorDataResponse)
 async def get_latest_sensor_data(
     device_id: int,
@@ -27,7 +29,8 @@ async def get_latest_sensor_data(
 ) -> SensorDataResponse:
     return await sensor_service.get_latest(db, device_id)
 
-# UC2-1 - Xem lịch sử dữ liệu theo thời gian (cho biểu đồ)
+# UC2-1 - Xem lịch sử dữ liệu theo thời gian -> trên fe có 1 filter lọc theo thời gian 
+# Done 
 @router.get("/{device_id}/history", response_model=list[SensorDataResponse])
 async def get_sensor_history(
     device_id: int,

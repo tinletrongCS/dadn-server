@@ -110,7 +110,7 @@ async def select_device(
 ):
     return await device_service.select_device(db, device, current_user)
 
-# Bỏ chọn thiết bị
+# 10. Bỏ chọn thiết bị
 # Done
 @router.post("/{device_id}/deselect")
 async def deselect_device(
@@ -121,7 +121,9 @@ async def deselect_device(
 ):
     return await device_service.deselect_device(db, device, current_user)
 
-# 10. Check the active status of a device for the logged in user
+# 11. API này quan trọng - khi làm giao diện cần chú ý
+# Nếu thiết bị đang có người sử dụng thì các nút điều khiển/chọn/... sẽ bị làm mờ 
+# ko cho bấm 
 # Done 
 @router.get("/{device_id}/check-active")
 async def check_active_device(
