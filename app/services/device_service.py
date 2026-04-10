@@ -29,6 +29,16 @@ async def get_device(db: Session, device: Device, current_user: User) -> Device:
     _log_action(db, current_user, device.device_id, "DEVICE_DETAILS_VIEWED", f"{current_user.username} xem t/tin chi tiết thiết bị {device.name}")
     return device
 
+async def get_active_device(db:Session, current_user: User) -> list[dict]:
+    records = device_repository.get_active_devices(db)
+    result = []
+    for device, username, full_name in records:
+        device_data = {c.name: getattr(device, c.name) for c in device.__table__.columns}
+        device_data["operated_by"] = full_name
+        device_data["operated_by_username"] = username
+        result.append(device_data)
+    return result
+
 
 async def update_device(db: Session, device_id: str, device_in: DeviceUpdate, current_user: User) -> Device:
     device = device_repository.get_by_id(db, device_id)

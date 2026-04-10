@@ -160,6 +160,10 @@ class DeviceResponse(ICTBaseModel, DeviceCreateUpdate):
 
     model_config = ConfigDict(from_attributes=True)
 
+class ActiveDeviceResponse(DeviceResponse):
+    operated_by: str
+    operated_by_username: str
+
 class DeviceStatusResponse(BaseModel):
     device_id: int
     mode: str

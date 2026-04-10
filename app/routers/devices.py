@@ -7,7 +7,7 @@ from models.domain_models import Device, User
 from dependencies.auth_deps import get_current_user, require_admin, get_device_or_404, require_active_device
 from schemas.domain_schemas import (
     DeviceResponse, DeviceStatusResponse, MessageResponse, 
-    DeviceCreateUpdate, DeviceUpdate, ThresholdUpdate, ModeUpdate
+    DeviceCreateUpdate, DeviceUpdate, ThresholdUpdate, ModeUpdate, ActiveDeviceResponse
 )
 from services import device_service
 
@@ -20,7 +20,14 @@ router = APIRouter()
 async def get_all_devices(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     return await device_service.get_all_devices(db, current_user)
 
-# 2. Thêm thiết bị mới (UC10B) - CHỈ ADMIN 
+# 1.1 Xem danh sách thiết bị đang hoạt động kèm người đang thao tác 
+# CHỈ ADMIN
+@router.get("/active", response_model=List[ActiveDeviceResponse])
+async def get_active_device(db: Session = Depends(get_db), current_user: User = Depends(require_admin)):
+    return await device_service.get_active_device(db, current_user)
+    
+# 2. Thêm thiết bị mới (UC10B) 
+# CHỈ ADMIN 
 # Done
 @router.post("", response_model=DeviceResponse, status_code=status.HTTP_201_CREATED)
 async def create_device(
@@ -41,7 +48,8 @@ async def get_device(
 ):
     return await device_service.get_device(db, device, current_user)
 
-# 4. Chỉnh sửa thông tin cơ bản (UC10C) - CHỈ ADMIN
+# 4. Chỉnh sửa thông tin cơ bản (UC10C) 
+# CHỈ ADMIN
 # Done
 @router.put("/{device_id}", response_model=DeviceResponse)
 async def update_device(
@@ -52,7 +60,8 @@ async def update_device(
 ):
     return await device_service.update_device(db, device_id, device_in, current_user)
 
-# 5. Xóa thiết bị (UC10D) - CHỈ ADMIN
+# 5. Xóa thiết bị (UC10D) 
+# CHỈ ADMIN
 # Done
 @router.delete("/{device_id}", response_model=MessageResponse)
 async def delete_device(
