@@ -1,5 +1,8 @@
 # dadn-server
 
+## Kiến trúc tổng quan hệ thống
+<img width="2050" height="1368" alt="image" src="https://github.com/user-attachments/assets/9868bee9-99c3-40a2-8d6f-583530e5bad6" />
+
 ## Hướng dẫn cấu hình
 
 1. Clone repo:
