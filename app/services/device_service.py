@@ -14,7 +14,7 @@ def _log_action(db: Session, user: User, device_id: str, action_type: str, desc:
 
 async def get_all_devices(db: Session, current_user: User) -> list[Device]:
     return device_repository.get_all(db)
-
+ 
 
 async def create_device(db: Session, device_in: DeviceCreateUpdate, current_user: User) -> Device:
     if device_repository.get_by_name(db, device_in.name):
