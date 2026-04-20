@@ -40,7 +40,7 @@ def deactivate_all_for_user(db: Session, user_id) -> None:
     ).update({"is_active": False}, synchronize_session=False)
     db.commit()
 
-# Lấy phiên điều khiển của thiết bị này trên toàn hệ thống 
+# Lấy phiên điều khiển của thiết bị trên toàn hệ thống 
 def get_active_global_for_device(db: Session, device_id: int) -> UserDevice | None:
     return db.query(UserDevice).filter(
         UserDevice.device_id == device_id,

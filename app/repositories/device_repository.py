@@ -1,7 +1,7 @@
 # app/repositories/device_repository.py
 
 from sqlalchemy.orm import Session
-from models.domain_models import Device
+from models.domain_models import Device, UserDevice, User
 
 
 def get_all(db: Session) -> list[Device]:
@@ -15,6 +15,12 @@ def get_by_id(db: Session, device_id) -> Device | None:
 def get_by_name(db: Session, name: str) -> Device | None:
     return db.query(Device).filter(Device.name == name).first()
 
+def get_active_devices(db: Session):
+    return db.query(Device, User.username, User.full_name).join(
+        UserDevice, Device.device_id == UserDevice.device_id
+    ).join(
+        User, UserDevice.user_id == User.user_id
+    ).filter(UserDevice.is_active == True).all()
 
 def create(db: Session, data: dict) -> Device:
     device = Device(**data)
