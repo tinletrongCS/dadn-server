@@ -5,4 +5,22 @@ env/
 app/venv/
 app/.env
 app/.idea
-app/__pycache__
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Frontend Vite/React
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.env
+frontend/.env.*.local
+frontend/node_modules/.vite/
+frontend/.vite/
+frontend/.cache/
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/pnpm-debug.log*
+frontend/.DS_Store
+frontend/.idea/
+frontend/.vscode/
