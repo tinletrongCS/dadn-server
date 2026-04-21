@@ -64,7 +64,8 @@ async def manual_control(
     )
 
     try:
-        await publish_command(feed_key, body.action)
+        mqtt_payload = f"{device_id}-{body.action}"
+        await publish_command(feed_key, mqtt_payload)
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Gửi lệnh tới thiết bị thất bại: {e}")
 
@@ -180,7 +181,8 @@ async def auto_control(
 
         try:
             feed_key = f"{actuator}-control"
-            await publish_command(feed_key, action.upper())
+            mqtt_payload = f"{device_id}-{action.upper()}"
+            await publish_command(feed_key, mqtt_payload)
         except Exception as e:
             logger.error(f"[AUTO] Publish MQTT thất bại: {e}")
             await emergency_alert(device_id, str(e), db, ws_manager)

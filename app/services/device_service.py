@@ -85,7 +85,8 @@ async def change_mode(db: Session, device: Device, mode_in: ModeUpdate, current_
     _log_action(db, current_user, device.device_id, "MODE_CHANGE", f"Người dùng {current_user.username} chuyển chế độ sang {updated_device.mode}")
     
     try:
-        await publish_command(settings.AIO_FEED_MODE, mode_in.mode)
+        mqtt_payload = f"{device.device_id}-{mode_in.mode}"
+        await publish_command(settings.AIO_FEED_MODE, mqtt_payload)
     except Exception as e:
         raise HTTPException(
             status_code=502,
