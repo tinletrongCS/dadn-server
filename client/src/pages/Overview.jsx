@@ -14,11 +14,11 @@ export default function Overview() {
         />
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(to right, rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.2))', display: 'flex', alignItems: 'center', padding: '3rem' }}>
           <div style={{ color: 'white', maxWidth: '600px' }}>
-            <h1 style={{ fontSize: '2rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <Sprout size={36} color="var(--primary-green)" />
-              Hệ thống nông trại thông minh Smart Farm YOLO:BIT
+            <h1 style={{ fontSize: '2rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <Sprout size={99} color="var(--primary-green)" />
+              Hệ thống nông trại thông minh Smart Farm Yolo:Bit
             </h1>
-            <p style={{ fontSize: '1.1rem', lineHeight: '1.6', color: '#cbd5e1' }}>
+            <p style={{ fontSize: '1.0rem', lineHeight: '1.6', color: '#cbd5e1' }}>
             Hệ thống IoT giúp theo dõi và điều chỉnh ngưỡng cảnh báo đối với các thiết bị, từ đó tăng khả năng giám sát và cải thiện năng suất trong nông nghiệp.
             </p>
           </div>
@@ -35,7 +35,7 @@ export default function Overview() {
             Theo dõi liên tục các chỉ số môi trường như nhiệt độ, độ ẩm, ánh sáng từ các cảm biến. Giao diện trực quan giúp bạn nắm bắt tình trạng nông trại ngay lập tức.
           </p>
           <button className="btn-secondary" style={{ marginTop: '1.5rem', display: 'inline-flex', alignItems: 'center', gap: '0.5rem', width: 'fit-content' }} onClick={() => navigate('/sensor-history')}>
-            Đi tới Lịch sử dữ liệu <ArrowRight size={16} />
+            Đi tới Lịch sử gửi dữ liệu <ArrowRight size={16} />
           </button>
         </div>
 

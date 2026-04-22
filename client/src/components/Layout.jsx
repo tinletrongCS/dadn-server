@@ -68,7 +68,7 @@ export default function Layout() {
       '/devices': [{ label: 'Trang chủ', path: '/' }, { label: isAdmin ? 'Quản lý thiết bị' : 'Cài đặt ngưỡng' }],
       '/devices/add': [{ label: 'Trang chủ', path: '/' }, { label: 'Thêm thiết bị' }],
       '/activity': [{ label: 'Dữ liệu & Báo cáo', path: '/activity' }, { label: 'Lịch sử hoạt động' }],
-      '/sensor-history': [{ label: 'Dữ liệu & Báo cáo', path: '/activity' }, { label: 'Lịch sử dữ liệu' }],
+      '/sensor-history': [{ label: 'Dữ liệu & Báo cáo', path: '/activity' }, { label: 'Lịch sử gửi dữ liệu' }],
       '/statistics': [{ label: 'Dữ liệu & Báo cáo', path: '/activity' }, { label: 'Thống kê hoạt động' }],
       '/account': [{ label: 'Quản lý tài khoản' }]
     };
@@ -128,7 +128,7 @@ export default function Layout() {
             </NavLink>
             <NavLink to="/sensor-history" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
               <LineChart className="nav-icon" />
-              Lịch sử dữ liệu
+              Lịch sử gửi dữ liệu
             </NavLink>
             <NavLink to="/statistics" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
               <BarChart3 className="nav-icon" />
