@@ -135,22 +135,36 @@ async def deselect_device(db: Session, device: Device, current_user: User) -> di
             status_code=400,
             detail="Thiết bị này đang được điều khiển bởi một người khác."
         )
+    # Tự động tắt máy bơm, tắt quạt và chuyển về chế độ thủ công
+    device.mode = "manual"
+    device.fan_status = False
+    device.pump_status = False
+    db.commit()
+    
+    try:
+        from core.config import settings
+        from mqtt.client import publish_command
+        await publish_command(settings.AIO_FEED_MODE, f"{device_id}-manual")
+        await publish_command(settings.AIO_FEED_FAN, f"{device_id}-False")
+        await publish_command(settings.AIO_FEED_PUMP, f"{device_id}-False")
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error(f"Lỗi gửi MQTT khi bỏ chọn: {e}")
+
     user_device_repository.set_active_status(db, user_device, False)
     
-    _log_action(db, current_user, device.device_id, "DEVICE_DESELECTED", f"Người dùng {current_user.username} đã bỏ chọn thao tác thiết bị {device.name} ")
-    return {"message": f"Đã bỏ chọn thiết bị {device.name} thành công", "is_active": False}
+    _log_action(db, current_user, device.device_id, "DEVICE_DESELECTED", f"Người dùng {current_user.username} đã bỏ chọn thiết bị. Hệ thống tự động tắt quạt, bơm và chuyển về thủ công.")
+    return {"message": f"Đã bỏ chọn thiết bị {device.name} và tự động tắt các thiết bị", "is_active": False}
 
 async def check_active_device(db: Session, device: Device, current_user: User) -> dict:
     user_device = user_device_repository.get_by_user_and_device(db, current_user.user_id, device.device_id)
     is_active = user_device.is_active if user_device else False
     
-    # Check if the device is currently being operated by someone else
     global_active = user_device_repository.get_active_global_for_device(db, device.device_id)
     is_busy_by_others = False
     operated_by_username = None
     if global_active and global_active.user_id != current_user.user_id:
         is_busy_by_others = True
-        # Get the username of the operator
         from models.domain_models import User as UserModel
         operator = db.query(UserModel).filter(UserModel.user_id == global_active.user_id).first()
         if operator:
