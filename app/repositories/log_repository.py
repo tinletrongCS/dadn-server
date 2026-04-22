@@ -65,3 +65,40 @@ def get_paginated(
         .all()
     )
     return items, total
+
+def get_stats(db: Session, user_id, is_admin: bool):
+    from sqlalchemy import func
+    
+    # Base query for stats
+    query = db.query(ActivityLog)
+    
+    if not is_admin:
+        # Normal users see their own logs + system logs related to their devices
+        # For stats, we usually focus on their own actions and alerts
+        query = query.filter(
+            (ActivityLog.user_id == user_id) | (ActivityLog.user_id == None)
+        )
+    elif user_id:
+        # Admin filtering by a specific user
+        query = query.filter(ActivityLog.user_id == user_id)
+
+    # Count by action_type
+    type_counts = db.query(
+        ActivityLog.action_type, 
+        func.count(ActivityLog.id)
+    ).filter(
+        # Apply the same filter as above
+        ((ActivityLog.user_id == user_id) | (ActivityLog.user_id == None)) if not is_admin else (ActivityLog.user_id == user_id if user_id else True)
+    ).group_by(ActivityLog.action_type).all()
+
+    # Count total alerts
+    alert_count = db.query(func.count(ActivityLog.id)).filter(
+        ((ActivityLog.user_id == user_id) | (ActivityLog.user_id == None)) if not is_admin else (ActivityLog.user_id == user_id if user_id else True),
+        ActivityLog.action_type.like('ALERT_%')
+    ).scalar()
+
+    return {
+        "total_logs": query.count(),
+        "alert_count": alert_count,
+        "type_counts": {t: c for t, c in type_counts}
+    }

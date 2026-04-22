@@ -14,7 +14,7 @@ def _log_action(db: Session, user: User, device_id: str, action_type: str, desc:
 
 async def get_all_devices(db: Session, current_user: User) -> list[Device]:
     return device_repository.get_all(db)
-
+ 
 
 async def create_device(db: Session, device_in: DeviceCreateUpdate, current_user: User) -> Device:
     if device_repository.get_by_name(db, device_in.name):
@@ -85,7 +85,8 @@ async def change_mode(db: Session, device: Device, mode_in: ModeUpdate, current_
     _log_action(db, current_user, device.device_id, "MODE_CHANGE", f"Người dùng {current_user.username} chuyển chế độ sang {updated_device.mode}")
     
     try:
-        await publish_command(settings.AIO_FEED_MODE, mode_in.mode)
+        mqtt_payload = f"{device.device_id}-{mode_in.mode}"
+        await publish_command(settings.AIO_FEED_MODE, mqtt_payload)
     except Exception as e:
         raise HTTPException(
             status_code=502,
@@ -142,4 +143,22 @@ async def deselect_device(db: Session, device: Device, current_user: User) -> di
 async def check_active_device(db: Session, device: Device, current_user: User) -> dict:
     user_device = user_device_repository.get_by_user_and_device(db, current_user.user_id, device.device_id)
     is_active = user_device.is_active if user_device else False
-    return {"device_id": device.device_id, "is_active": is_active}
+    
+    # Check if the device is currently being operated by someone else
+    global_active = user_device_repository.get_active_global_for_device(db, device.device_id)
+    is_busy_by_others = False
+    operated_by_username = None
+    if global_active and global_active.user_id != current_user.user_id:
+        is_busy_by_others = True
+        # Get the username of the operator
+        from models.domain_models import User as UserModel
+        operator = db.query(UserModel).filter(UserModel.user_id == global_active.user_id).first()
+        if operator:
+            operated_by_username = operator.username
+    
+    return {
+        "device_id": device.device_id,
+        "is_active": is_active,
+        "is_busy_by_others": is_busy_by_others,
+        "operated_by_username": operated_by_username,
+    }

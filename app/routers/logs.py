@@ -34,3 +34,11 @@ async def get_logs(
         page=page,
         limit=limit,
     )
+
+@router.get("/stats")
+async def get_log_stats(
+    user_id: Optional[str] = Query(None, description="Lọc thống kê theo User ID (chỉ Admin)"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return await log_service.get_log_stats(db, current_user, user_id)

@@ -34,32 +34,34 @@ export default function Login() {
           <Leaf className="logo-icon" />
           <h1>Yolo Farm</h1>
         </div>
-        
+
         <div className="auth-body">
           <h2>Welcome Back</h2>
           <p className="subtitle">Sign in to manage your smart farm.</p>
 
           {error && <div className="auth-error">{error}</div>}
 
-          <form onSubmit={handleSubmit} className="auth-form">
+          <form onSubmit={handleSubmit} className="auth-form" autoComplete="off">
             <div className="form-group">
               <label htmlFor="username">Username</label>
-              <input 
-                type="text" 
-                id="username" 
-                placeholder="Enter your username"
+              <input
+                type="text"
+                id="username"
+                autoComplete="username"
+                placeholder="Nhập tên đăng nhập"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
               />
             </div>
-            
+
             <div className="form-group">
               <label htmlFor="password">Password</label>
-              <input 
-                type="password" 
-                id="password" 
-                placeholder="Enter your password"
+              <input
+                type="password"
+                id="password"
+                autoComplete="current-password"
+                placeholder="Nhập mật khẩu"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
