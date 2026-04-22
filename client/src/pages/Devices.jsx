@@ -2,7 +2,8 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import {
   fetchDevices, fetchActiveDevices, checkActiveDevice,
-  selectDevice, deselectDevice, updateThreshold
+  selectDevice, deselectDevice, updateThreshold,
+  controlFan, controlPump, changeDeviceMode
 } from '../api';
 import {
   Cpu, RefreshCw, UserCheck, Sliders, CheckCircle2,
@@ -167,6 +168,15 @@ export default function Devices() {
   const handleDeselect = async (deviceId) => {
     setActionLoading(prev => ({ ...prev, [`sel-${deviceId}`]: true }));
     try {
+      // Gọi API tắt quạt, bơm, mode manual trước khi bỏ chọn
+      try {
+        await controlFan(token, deviceId, 'False');
+        await controlPump(token, deviceId, 'False');
+        await changeDeviceMode(token, deviceId, 'manual');
+      } catch (autoErr) {
+        console.error("Lỗi tự động tắt thiết bị: ", autoErr);
+      }
+      
       await deselectDevice(token, deviceId);
       const res = await checkActiveDevice(token, deviceId);
       setActiveMap(prev => ({ ...prev, [deviceId]: res }));

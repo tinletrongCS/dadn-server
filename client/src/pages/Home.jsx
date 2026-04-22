@@ -250,6 +250,14 @@ export default function Home() {
     setActionLoading(prev => ({ ...prev, [`sel-${deviceId}`]: true }));
     setErrorMap(prev => ({ ...prev, [deviceId]: null }));
     try {
+      try {
+        await controlFan(token, deviceId, 'False');
+        await controlPump(token, deviceId, 'False');
+        await changeDeviceMode(token, deviceId, 'manual');
+      } catch (autoErr) {
+        console.error("Lỗi tự động tắt thiết bị: ", autoErr);
+      }
+      
       await deselectDevice(token, deviceId);
       await loadDevices(true);
     } catch (err) {
