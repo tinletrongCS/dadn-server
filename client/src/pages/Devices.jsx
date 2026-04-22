@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 
 // Threshold form component
-function ThresholdForm({ device, token, activeMap, onSuccess }) {
+function ThresholdForm({ device, token, activeMap, onSuccess, onNotify }) {
   const isActive = activeMap[device.device_id]?.is_active === true;
   const [form, setForm] = useState({
     temp_min: device.temp_min ?? '',
@@ -39,10 +39,11 @@ function ThresholdForm({ device, token, activeMap, onSuccess }) {
         if (v !== '') payload[k] = Number(v);
       });
       await updateThreshold(token, device.device_id, payload);
-      alert("Cập nhật ngưỡng thành công cho thiết bị " + device.name);
+      onNotify?.(`Cập nhật ngưỡng thành công cho ${device.name}`, 'success');
       onSuccess?.();
     } catch (err) {
       setError(err.message);
+      onNotify?.(err.message, 'error');
     } finally {
       setLoading(false);
     }
@@ -105,6 +106,12 @@ export default function Devices() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState({});
   const [expandedDevice, setExpandedDevice] = useState(null);
+  const [notification, setNotification] = useState(null);
+
+  const showNotification = (message, type = 'success') => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 3000);
+  };
 
   const loadDevices = useCallback(async (isSilent = false) => {
     if (!token) return;
@@ -175,7 +182,34 @@ export default function Devices() {
   };
 
   return (
-    <div>
+    <div style={{ position: 'relative' }}>
+      {notification && (
+        <div className={`toast-notification ${notification.type}`} style={{
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          padding: '1.5rem 2.5rem',
+          borderRadius: '0px',
+          border: 'none',
+          color: 'white',
+          background: notification.type === 'success' ? '#23c552' : 'rgba(153, 27, 27, 0.95)',
+          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.4)',
+          zIndex: 9999,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '1rem',
+          backdropFilter: 'blur(8px)',
+          animation: 'fadeIn 0.3s ease-out',
+          textAlign: 'center',
+          minWidth: '300px'
+        }}>
+          <CheckCircle2 size={48} />
+          <span style={{ fontWeight: 600, fontSize: '1.2rem' }}>{notification.message}</span>
+        </div>
+      )}
+
       <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h1>Cài đặt ngưỡng & Quản lý</h1>
         <button className="btn-secondary btn-sm" onClick={() => loadDevices()} disabled={loading}>
@@ -228,7 +262,7 @@ export default function Devices() {
 
               <div className="device-actions">
                 {isActive ? (
-                  <button className="btn-secondary btn-sm" onClick={() => handleDeselect(deviceId)} disabled={selLoading}>
+                  <button className="btn-secondary btn-sm" onClick={() => handleDeselect(deviceId)} disabled={selLoading} style={{ backgroundColor: '#ef4444', color: 'white', border: 'none' }}>
                     Bỏ chọn
                   </button>
                 ) : (
@@ -241,7 +275,7 @@ export default function Devices() {
                   </button>
                 )}
 
-                <button className="btn-secondary btn-sm" onClick={() => toggleExpand(deviceId)}>
+                <button className="btn-secondary btn-sm" onClick={() => toggleExpand(deviceId)} style={{ backgroundColor: '#2196F3', color: 'white', border: 'none' }}>
                   {isExpanded ? <><ChevronUp size={14} /> Đóng</> : <><ChevronDown size={14} /> Cài đặt ngưỡng</>}
                 </button>
               </div>
@@ -255,7 +289,8 @@ export default function Devices() {
                     device={device}
                     token={token}
                     activeMap={activeMap}
-                    onSuccess={() => window.location.reload()}
+                    onSuccess={() => loadDevices()}
+                    onNotify={showNotification}
                   />
                 </div>
               )}

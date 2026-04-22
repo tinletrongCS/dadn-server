@@ -307,6 +307,10 @@ body {
   color: white;
 }
 
+.breadcrumb-link:hover {
+  color: white !important;
+}
+
 .nav-group-content {
   display: flex;
   flex-direction: column;

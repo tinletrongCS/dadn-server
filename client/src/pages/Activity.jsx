@@ -147,7 +147,6 @@ export default function Activity() {
                 checked={showAlerts}
                 onChange={e => setShowAlerts(e.target.checked)}
               />
-              <AlertTriangle size={14} />
               Hiện các log cảnh báo (ALERT_*) 
             </label>
             <div className="filter-buttons">

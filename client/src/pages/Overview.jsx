@@ -7,12 +7,12 @@ export default function Overview() {
   return (
     <div className="overview-container">
       <div className="overview-header" style={{ position: 'relative', overflow: 'hidden', borderRadius: '0px', marginBottom: '2rem' }}>
-        <img 
-          src="/farm-banner.jpeg" 
-          alt="Smart Farm Banner" 
-          style={{ width: '100%', height: '450px', objectFit: 'cover', objectPosition: 'center top', display: 'block' }} 
+        <img
+          src="/farm-banner.jpeg"
+          alt="Smart Farm Banner"
+          style={{ width: '100%', height: '430px', objectFit: 'cover', objectPosition: 'center top', display: 'block' }}
         />
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(to right, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.3))', display: 'flex', alignItems: 'center', padding: '3rem' }}>
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(to right, rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.2))', display: 'flex', alignItems: 'center', padding: '3rem' }}>
           <div style={{ color: 'white', maxWidth: '600px' }}>
             <h1 style={{ fontSize: '2rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               <Sprout size={36} color="var(--primary-green)" />
@@ -28,7 +28,7 @@ export default function Overview() {
       <div className="overview-cards" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
         <div className="card" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', color: 'var(--primary-green)' }}>
-            <LayoutDashboard size={24} />
+            <LayoutDashboard size={26} />
             <h2 style={{ fontSize: '1.25rem', margin: 0, color: 'var(--text-main)' }}>Giám sát thời gian thực</h2>
           </div>
           <p style={{ color: 'var(--text-muted)', lineHeight: '1.5', flex: 1 }}>
@@ -41,7 +41,7 @@ export default function Overview() {
 
         <div className="card" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', color: '#3b82f6' }}>
-            <Cpu size={24} />
+            <Cpu size={26 } />
             <h2 style={{ fontSize: '1.25rem', margin: 0, color: 'var(--text-main)' }}>Điều khiển tự động</h2>
           </div>
           <p style={{ color: 'var(--text-muted)', lineHeight: '1.5', flex: 1 }}>
@@ -54,7 +54,7 @@ export default function Overview() {
 
         <div className="card" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', color: '#8b5cf6' }}>
-            <Activity size={24} />
+            <Activity size={26} />
             <h2 style={{ fontSize: '1.25rem', margin: 0, color: 'var(--text-main)' }}>Phân tích & Thống kê</h2>
           </div>
           <p style={{ color: 'var(--text-muted)', lineHeight: '1.5', flex: 1 }}>

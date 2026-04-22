@@ -45,7 +45,7 @@ function DeviceDetailModal({ isOpen, onClose, device, token, onAction, status, s
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <Cpu size={24} className="primary-green" />
             <div>
-              <h3 style={{ margin: 0 }}>Chi tiết thiết bị: {device.name}</h3>
+              <h3 style={{ margin: 0 }}>Điều khiển thiết bị: {device.name}</h3>
               <span className="device-id">ID: {device.device_id}</span>
             </div>
           </div>
@@ -371,7 +371,7 @@ export default function Home() {
           )}
 
           <button className="btn-secondary btn-sm" onClick={() => handleOpenDetail(device)}>
-            <Eye size={14} /> Chi tiết
+            <Settings size={14} /> Thao tác
           </button>
         </div>
       </div>
@@ -381,7 +381,7 @@ export default function Home() {
   return (
     <div>
       <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h1>Trang chủ</h1>
+        <h1>Bảng điều khiển</h1>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
           <button className="btn-secondary btn-sm" onClick={() => loadDevices()} disabled={loading}>
             <RefreshCw size={14} className={loading ? 'spin' : ''} /> Tải lại

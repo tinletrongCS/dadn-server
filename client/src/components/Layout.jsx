@@ -24,8 +24,8 @@ function NavGroup({ icon: Icon, title, children, activePaths = [] }) {
 
   return (
     <div className="nav-group">
-      <button 
-        className={`nav-group-header ${isActive ? 'active' : ''}`} 
+      <button
+        className={`nav-group-header ${isActive ? 'active' : ''}`}
         onClick={() => setIsOpen(!isOpen)}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -45,8 +45,22 @@ function NavGroup({ icon: Icon, title, children, activePaths = [] }) {
 
 export default function Layout() {
   const { user, logout } = useAuth();
+  const location = useLocation();
   // role_id = 1 is admin, role_id = 2 is normal user
   const isAdmin = user?.role_id === 1;
+  const getBreadcrumbs = () => {
+    const paths = {
+      '/': [{ label: 'Trang chủ', path: '/' }, { label: 'Tổng quan' }],
+      '/dashboard': [{ label: 'Trang chủ', path: '/' }, { label: 'Bảng điều khiển' }],
+      '/devices': [{ label: 'Trang chủ', path: '/' }, { label: isAdmin ? 'Quản lý thiết bị' : 'Cài đặt ngưỡng' }],
+      '/devices/add': [{ label: 'Trang chủ', path: '/' }, { label: 'Thêm thiết bị' }],
+      '/activity': [{ label: 'Dữ liệu & Báo cáo', path: '/activity' }, { label: 'Lịch sử hoạt động' }],
+      '/sensor-history': [{ label: 'Dữ liệu & Báo cáo', path: '/activity' }, { label: 'Lịch sử dữ liệu' }],
+      '/statistics': [{ label: 'Dữ liệu & Báo cáo', path: '/activity' }, { label: 'Thống kê hoạt động' }],
+      '/account': [{ label: 'Quản lý tài khoản' }]
+    };
+    return paths[location.pathname] || [];
+  };
 
   return (
     <div className="dashboard-layout">
@@ -58,11 +72,11 @@ export default function Layout() {
         </div>
 
         <nav className="sidebar-nav" style={{ padding: '0.5rem' }}>
-          
-          <NavGroup 
-            icon={Home} 
-            title="Trang chủ" 
-            activePaths={['/', '/dashboard', '/devices']} 
+
+          <NavGroup
+            icon={Home}
+            title="Trang chủ"
+            activePaths={['/', '/dashboard', '/devices', '/devices/add']}
             defaultOpen={true}
           >
             <NavLink to="/" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"} end>
@@ -85,9 +99,9 @@ export default function Layout() {
             )}
           </NavGroup>
 
-          <NavGroup 
-            icon={Database} 
-            title="Dữ liệu & Báo cáo" 
+          <NavGroup
+            icon={Database}
+            title="Dữ liệu & Báo cáo"
             activePaths={['/activity', '/statistics', '/sensor-history']}
           >
             <NavLink to="/activity" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
@@ -123,7 +137,32 @@ export default function Layout() {
 
       {/* Main Content Area */}
       <div className="main-content">
-        <header className="dashboard-header">
+        <header className="dashboard-header" style={{ justifyContent: 'space-between' }}>
+          <div className="breadcrumb" style={{ fontSize: '0.95rem', fontWeight: 500, color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            {getBreadcrumbs().map((crumb, index, arr) => (
+              <React.Fragment key={index}>
+                {crumb.path ? (
+                  <NavLink
+                    to={crumb.path}
+                    style={({ isActive }) => ({
+                      color: isActive && index === arr.length - 1 ? 'white' : '#cbd5e1',
+                      textDecoration: 'none',
+                      transition: 'color 0.2s',
+                      fontWeight: index === arr.length - 1 ? 600 : 500
+                    })}
+                    className="breadcrumb-link"
+                  >
+                    {crumb.label}
+                  </NavLink>
+                ) : (
+                  <span style={{ color: index === arr.length - 1 ? 'white' : '#cbd5e1', fontWeight: index === arr.length - 1 ? 600 : 500 }}>
+                    {crumb.label}
+                  </span>
+                )}
+                {index < arr.length - 1 && <ChevronRight size={14} style={{ opacity: 0.6 }} />}
+              </React.Fragment>
+            ))}
+          </div>
           <div className="user-info">
             <span>Xin chào, {user?.full_name || user?.username || 'User'}!</span>
           </div>
