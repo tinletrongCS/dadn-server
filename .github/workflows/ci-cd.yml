@@ -1,0 +1,66 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+
+jobs:
+  build-and-test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # Cấu hình & Kiểm tra Backend
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Backend Dependencies
+        run: |
+          cd app
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+
+      # Cấu hình & Kiểm tra Frontend 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Frontend Dependencies
+        run: |
+          cd client
+          npm install
+
+      - name: Build Frontend
+        run: |
+          cd client
+          npm run build
+
+  deploy:
+    name: Deploy to Render
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    # Chỉ deploy khi code được push vào nhánh dev
+    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+    
+    steps:
+      - name: Trigger Render Deploy Hook
+        # Webhook URL lấy từ Render Dashboard 
+        run: |
+          if [ -z "${{ secrets.RENDER_DEPLOY_HOOK }}" ]; then
+            echo "Error: RENDER_DEPLOY_HOOK secret is not set."
+            exit 1
+          fi
+          curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"

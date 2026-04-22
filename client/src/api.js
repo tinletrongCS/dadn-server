@@ -1,4 +1,5 @@
-const API_BASE_URL = "http://localhost:8000";
+// const API_BASE_URL = "http://localhost:8000";
+const API_BASE_URL = "https://smart-farm-dadn.onrender.com";
 
 // Helper for authenticated requests
 async function authFetch(url, token, options = {}) {
