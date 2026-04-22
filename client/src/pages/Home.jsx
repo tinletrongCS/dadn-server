@@ -249,19 +249,24 @@ export default function Home() {
   const handleDeselect = async (deviceId) => {
     setActionLoading(prev => ({ ...prev, [`sel-${deviceId}`]: true }));
     setErrorMap(prev => ({ ...prev, [deviceId]: null }));
+    
+    // Optimistic Update ngay lập tức - 0ms delay
+    setDevices(prev => prev.map(d => 
+      d.device_id === deviceId ? { ...d, fan_status: false, pump_status: false, mode: 'manual' } : d
+    ));
+    setActiveMap(prev => ({ ...prev, [deviceId]: { ...prev[deviceId], is_active: false, is_busy_by_others: false } }));
+    setStatusMap(prev => ({ ...prev, [deviceId]: { ...prev[deviceId], fan_status: false, pump_status: false, mode: 'manual' } }));
+
+    // Gọi API nền song song - không block UI
     try {
-      try {
-        await controlFan(token, deviceId, 'False');
-        await controlPump(token, deviceId, 'False');
-        await changeDeviceMode(token, deviceId, 'manual');
-      } catch (autoErr) {
-        console.error("Lỗi tự động tắt thiết bị: ", autoErr);
-      }
-      
-      await deselectDevice(token, deviceId);
-      await loadDevices(true);
+      await Promise.all([
+        controlFan(token, deviceId, 'False'),
+        controlPump(token, deviceId, 'False'),
+        changeDeviceMode(token, deviceId, 'manual'),
+        deselectDevice(token, deviceId)
+      ]);
     } catch (err) {
-      setErrorMap(prev => ({ ...prev, [deviceId]: err.message }));
+      console.error("Lỗi khi bỏ chọn: ", err);
     } finally {
       setActionLoading(prev => ({ ...prev, [`sel-${deviceId}`]: false }));
     }
