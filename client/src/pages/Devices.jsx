@@ -249,7 +249,9 @@ export default function Devices() {
               {isAdmin && operator && (
                 <div className="operator-info">
                   <UserCheck size={14} />
-                  <span>Đang được thao tác bởi: <strong>{operator.operated_by}</strong></span>
+                  <span>
+                    Đang được thao tác bởi: <strong>{operator.operated_by_username === user.username ? "Bạn" : operator.operated_by}</strong>
+                  </span>
                 </div>
               )}
 
