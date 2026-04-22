@@ -63,4 +63,11 @@ jobs:
             echo "Error: RENDER_DEPLOY_HOOK secret is not set."
             exit 1
           fi
+          # Deploy Backend
           curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
+          
+          # Deploy Frontend (Nếu có cấu hình)
+          if [ -n "${{ secrets.RENDER_FRONTEND_HOOK }}" ]; then
+            echo "Triggering Frontend Deploy..."
+            curl -X POST "${{ secrets.RENDER_FRONTEND_HOOK }}"
+          fi
