@@ -17,16 +17,16 @@ import {
   Home
 } from 'lucide-react';
 
-function NavGroup({ icon: Icon, title, children, activePaths = [] }) {
+function NavGroup({ icon: Icon, title, children, activePaths = [], groupId, openGroup, setOpenGroup }) {
   const location = useLocation();
   const isActive = activePaths.some(path => location.pathname === path || location.pathname.startsWith(`${path}/`));
-  const [isOpen, setIsOpen] = useState(isActive);
+  const isOpen = openGroup === groupId;
 
   return (
     <div className="nav-group">
       <button
         className={`nav-group-header ${isActive ? 'active' : ''}`}
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => setOpenGroup(isOpen ? null : groupId)}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <Icon className="nav-icon" />
@@ -48,6 +48,19 @@ export default function Layout() {
   const location = useLocation();
   // role_id = 1 is admin, role_id = 2 is normal user
   const isAdmin = user?.role_id === 1;
+  const [openGroup, setOpenGroup] = useState(null);
+
+  React.useEffect(() => {
+    const homePaths = ['/', '/dashboard', '/devices', '/devices/add'];
+    const dataPaths = ['/activity', '/statistics', '/sensor-history'];
+    
+    if (homePaths.some(p => location.pathname === p || location.pathname.startsWith(`${p}/`))) {
+      setOpenGroup('home');
+    } else if (dataPaths.some(p => location.pathname === p || location.pathname.startsWith(`${p}/`))) {
+      setOpenGroup('data');
+    }
+  }, [location.pathname]);
+
   const getBreadcrumbs = () => {
     const paths = {
       '/': [{ label: 'Trang chủ', path: '/' }, { label: 'Tổng quan' }],
@@ -74,10 +87,12 @@ export default function Layout() {
         <nav className="sidebar-nav" style={{ padding: '0.5rem' }}>
 
           <NavGroup
+            groupId="home"
+            openGroup={openGroup}
+            setOpenGroup={setOpenGroup}
             icon={Home}
             title="Trang chủ"
             activePaths={['/', '/dashboard', '/devices', '/devices/add']}
-            defaultOpen={true}
           >
             <NavLink to="/" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"} end>
               <LayoutDashboard className="nav-icon" />
@@ -100,6 +115,9 @@ export default function Layout() {
           </NavGroup>
 
           <NavGroup
+            groupId="data"
+            openGroup={openGroup}
+            setOpenGroup={setOpenGroup}
             icon={Database}
             title="Dữ liệu & Báo cáo"
             activePaths={['/activity', '/statistics', '/sensor-history']}
