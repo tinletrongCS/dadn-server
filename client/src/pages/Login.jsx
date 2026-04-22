@@ -21,7 +21,7 @@ export default function Login() {
       login(data.access_token);
       navigate('/');
     } catch (err) {
-      setError(err.message || "Failed to login");
+      setError(err.message || "Đăng nhập thất bại");
     } finally {
       setLoading(false);
     }
@@ -33,11 +33,12 @@ export default function Login() {
         <div className="auth-header">
           <Leaf className="logo-icon" />
           <h1>Yolo Farm</h1>
+          <h2><font size="8px">Hệ thống nông trại thông minh</font></h2>
         </div>
 
         <div className="auth-body">
-          <h2>Welcome Back</h2>
-          <p className="subtitle">Sign in to manage your smart farm.</p>
+          <h2>Xin chào</h2>
+          <p className="subtitle">Đăng nhập để quản lý hệ thống nông trại thông minh.</p>
 
           {error && <div className="auth-error">{error}</div>}
 
@@ -69,12 +70,12 @@ export default function Login() {
             </div>
 
             <button type="submit" disabled={loading} className="btn-primary">
-              {loading ? "Signing in..." : "Sign In"}
+              {loading ? "Đang đăng nhập..." : "Đăng nhập"}
             </button>
           </form>
 
           <div className="auth-footer">
-            <p>Don't have an account? <Link to="/register">Register here</Link></p>
+            <p>Chưa có tài khoản? <Link to="/register">Đăng ký</Link></p>
           </div>
         </div>
       </div>

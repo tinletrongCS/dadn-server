@@ -56,26 +56,26 @@ export default function Register() {
         </div>
 
         <div className="auth-body">
-          <h2>Create Account</h2>
+          <h2>Tạo tài khoản</h2>
           <p className="subtitle">
-            Join Yolo Farm and manage everything easily.
+            Tham gia Yolo Farm và quản lý mọi thứ một cách dễ dàng.
           </p>
 
           {error && <div className="auth-error">{error}</div>}
           {success && (
             <div className="auth-success">
-              Registration successful! Redirecting to login...
+              Đăng ký thành công! Đang chuyển hướng đến trang đăng nhập...
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="auth-form">
             <div className="form-group">
-              <label htmlFor="full_name">Full Name</label>
+              <label htmlFor="full_name">Họ và tên</label>
               <input
                 type="text"
                 id="full_name"
                 name="full_name"
-                placeholder="John Doe"
+                placeholder="Vd: Nguyễn Văn A"
                 value={formData.full_name}
                 onChange={handleChange}
                 required
@@ -83,12 +83,12 @@ export default function Register() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="username">Username</label>
+              <label htmlFor="username">Tên đăng nhập</label>
               <input
                 type="text"
                 id="username"
                 name="username"
-                placeholder="johndoe123"
+                placeholder="Vd: nguyenvana123"
                 value={formData.username}
                 onChange={handleChange}
                 required
@@ -101,7 +101,7 @@ export default function Register() {
                 type="email"
                 id="email"
                 name="email"
-                placeholder="john@example.com"
+                placeholder="Vd: a.nv@gmail.com"
                 value={formData.email}
                 onChange={handleChange}
                 required
@@ -110,24 +110,24 @@ export default function Register() {
 
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="password">Password</label>
+                <label htmlFor="password">Mật khẩu</label>
                 <input
                   type="password"
                   id="password"
                   name="password"
-                  placeholder="Create a password"
+                  placeholder="Tạo mật khẩu"
                   value={formData.password}
                   onChange={handleChange}
                   required
                 />
               </div>
               <div className="form-group">
-                <label htmlFor="confirm_password">Confirm Password</label>
+                <label htmlFor="confirm_password">Xác nhận mật khẩu</label>
                 <input
                   type="password"
                   id="confirm_password"
                   name="confirm_password"
-                  placeholder="Confirm it"
+                  placeholder="Xác nhận mật khẩu"
                   value={formData.confirm_password}
                   onChange={handleChange}
                   required
@@ -141,13 +141,13 @@ export default function Register() {
               className="btn-primary"
               style={{ marginTop: "0.5rem" }}
             >
-              {loading ? "Registering..." : "Sign Up"}
+              {loading ? "Đang đăng ký..." : "Đăng ký"}
             </button>
           </form>
 
           <div className="auth-footer">
             <p>
-              Already have an account? <Link to="/login">Sign in</Link>
+              Đã có tài khoản? <Link to="/login">Đăng nhập</Link>
             </p>
           </div>
         </div>
