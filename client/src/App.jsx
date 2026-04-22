@@ -3,6 +3,15 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
 import Login from './pages/Login'
 import Register from './pages/Register'
+import Layout from './components/Layout'
+import Home from './pages/Home'
+import Activity from './pages/Activity'
+import Account from './pages/Account'
+import Devices from './pages/Devices'
+import Statistics from './pages/Statistics'
+import SensorHistory from './pages/SensorHistory'
+import Overview from './pages/Overview'
+import AddDevice from './pages/AddDevice'
 import './App.css'
 
 function ProtectedRoute({ children }) {
@@ -14,25 +23,16 @@ function ProtectedRoute({ children }) {
   return children;
 }
 
-function Home() {
-  const { user, logout } = useAuth();
-  return (
-    <div className="dashboard-layout">
-      <header className="dashboard-header">
-        <h2>Yolo Farm Dashboard</h2>
-        <div className="user-info">
-          <span>Welcome, {user?.full_name || user?.username || 'User'}!</span>
-          <button onClick={logout} className="btn-secondary">Logout</button>
-        </div>
-      </header>
-      <main className="dashboard-content">
-        <div className="card">
-          <h3>Farm Status</h3>
-          <p>Your connected devices and sensors will appear here.</p>
-        </div>
-      </main>
-    </div>
-  );
+function AdminRoute({ children }) {
+  const { user, loading } = useAuth();
+
+  if (loading) return <div className="loading-screen">Loading...</div>;
+  
+  // role_id = 1 is admin, role_id = 2 is normal user
+  const isAdmin = user?.role_id === 1;
+  if (!isAdmin) return <Navigate to="/" replace />;
+  
+  return children;
 }
 
 function App() {
@@ -40,14 +40,29 @@ function App() {
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      
       <Route 
         path="/" 
         element={
           <ProtectedRoute>
-            <Home />
+            <Layout />
           </ProtectedRoute>
-        } 
-      />
+        }
+      >
+        <Route index element={<Overview />} />
+        <Route path="dashboard" element={<Home />} />
+        <Route path="activity" element={<Activity />} />
+        <Route path="account" element={<Account />} />
+        <Route path="statistics" element={<Statistics />} />
+        <Route path="sensor-history" element={<SensorHistory />} />
+        <Route path="devices" element={<Devices />} />
+        <Route path="devices/add" element={
+          <AdminRoute>
+            <AddDevice />
+          </AdminRoute>
+        } />
+      </Route>
+      
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )

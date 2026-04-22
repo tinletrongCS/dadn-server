@@ -17,7 +17,9 @@ router = APIRouter()
 # 1. Xem danh sách thiết bị (UC10A) 
 # Done
 @router.get("", response_model=List[DeviceResponse])
-async def get_all_devices(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def get_all_devices(
+    db: Session = Depends(get_db), 
+    current_user: User = Depends(get_current_user)):
     return await device_service.get_all_devices(db, current_user)
 
 # 1.1 Xem danh sách thiết bị đang hoạt động kèm người đang thao tác 

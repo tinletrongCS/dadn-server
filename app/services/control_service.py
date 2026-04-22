@@ -63,6 +63,7 @@ async def manual_control(
         description=(f"{current_user.username} {'bật' if body.action == 'True' else 'tắt'} {'quạt' if actuator == 'fan' else 'máy bơm'} thủ công"),
     )
 
+    # Payload publish lên Ada là string kèm theo id thiết bị
     try:
         mqtt_payload = f"{device_id}-{body.action}"
         await publish_command(feed_key, mqtt_payload)

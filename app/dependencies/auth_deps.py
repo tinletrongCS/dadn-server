@@ -22,12 +22,10 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Tài khoản không tồn tại hoặc đã bị khóa")
     return user 
 
-
 async def require_admin(current_user: User = Depends(get_current_user)) -> User:
     if current_user.role_id != 1:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Không đủ quyền truy cập. Yêu cầu quyền Admin.")
     return current_user
-
 
 async def get_device_or_404(device_id: str, db: Session = Depends(get_db)) -> Device:
     device = db.query(Device).filter(Device.device_id == device_id).first()
@@ -38,8 +36,6 @@ async def get_device_or_404(device_id: str, db: Session = Depends(get_db)) -> De
         )
     return device
 
-# Đảm bảo rằng người dùng hiện tại nếu muốn thao tác thì phải có quyền admin 
-# hoặc đã lựa chọn thiết bị này trước đó 
 async def require_active_device(
     device_id: int,
     current_user: User = Depends(get_current_user),
@@ -67,4 +63,3 @@ async def require_active_device(
             detail="Cảnh báo: Bạn cần lựa chọn thiết bị này trước khi thao tác"
         )
     return device
-

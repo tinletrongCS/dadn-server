@@ -37,3 +37,15 @@ async def get_logs(
         page=page,
         limit=limit,
     )
+
+async def get_log_stats(db: Session, current_user: User, user_id: Optional[str] = None):
+    is_admin = (current_user.role_id == 1)
+    
+    # Permission check: users can only see their own stats
+    # Admins can see anyone's stats if user_id is provided, or total stats if not
+    target_user_id = user_id if is_admin and user_id else current_user.user_id
+    
+    if not is_admin:
+        target_user_id = current_user.user_id
+
+    return log_repository.get_stats(db, target_user_id, is_admin)
