@@ -3,12 +3,12 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - main
-      - master
+      - backup
+      - dev
+      - tin
   pull_request:
     branches:
-      - main
-      - master
+      - dev
 
 jobs:
   build-and-test:
