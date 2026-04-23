@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from database import Base, engine
 from mqtt.client import mqtt_subscribe_loop
-from routers import auth, devices, sensors, control, logs, ws
+from routers import auth, devices, sensors, control, logs, ws, users
 
 
 logging.basicConfig(level=logging.INFO)
@@ -45,6 +45,7 @@ def read_root():
     return {"status": "OK", "message": "--- IoT Smart Farm: Server is running ==="}
 
 app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
+app.include_router(users.router, prefix="/users", tags=["Users"])
 app.include_router(devices.router, prefix="/devices", tags=["Devices"])
 app.include_router(sensors.router, prefix="/sensors", tags=["Sensors"])
 app.include_router(control.router, prefix="/control", tags=["Control"])

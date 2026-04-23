@@ -13,6 +13,8 @@ import SensorHistory from './pages/SensorHistory'
 import Overview from './pages/Overview'
 import AddDevice from './pages/AddDevice'
 import ThresholdManagement from './pages/ThresholdManagement'
+import MyAccount from './pages/MyAccount'
+import UserManagement from './pages/UserManagement'
 import './App.css'
 
 function ProtectedRoute({ children }) {
@@ -53,7 +55,13 @@ function App() {
         <Route index element={<Overview />} />
         <Route path="dashboard" element={<Home />} />
         <Route path="activity" element={<Activity />} />
-        <Route path="account" element={<Account />} />
+        <Route path="account" element={<Navigate to="/account/me" replace />} />
+        <Route path="account/me" element={<MyAccount />} />
+        <Route path="account/users" element={
+          <AdminRoute>
+            <UserManagement />
+          </AdminRoute>
+        } />
         <Route path="statistics" element={<Statistics />} />
         <Route path="sensor-history" element={<SensorHistory />} />
         <Route path="devices" element={<Devices />} />

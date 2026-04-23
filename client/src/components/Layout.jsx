@@ -15,7 +15,9 @@ import {
   Database,
   PlusCircle,
   Home,
-  Sliders
+  Sliders,
+  UserCircle,
+  UserCog
 } from 'lucide-react';
 
 function NavGroup({ icon: Icon, title, children, activePaths = [], groupId, openGroup, setOpenGroup }) {
@@ -54,11 +56,14 @@ export default function Layout() {
   React.useEffect(() => {
     const homePaths = ['/', '/dashboard', '/devices', '/devices/add', '/threshold-management'];
     const dataPaths = ['/activity', '/statistics', '/sensor-history'];
+    const accountPaths = ['/account/me', '/account/users'];
     
     if (homePaths.some(p => location.pathname === p || location.pathname.startsWith(`${p}/`))) {
       setOpenGroup('home');
     } else if (dataPaths.some(p => location.pathname === p || location.pathname.startsWith(`${p}/`))) {
       setOpenGroup('data');
+    } else if (accountPaths.some(p => location.pathname === p || location.pathname.startsWith(`${p}/`))) {
+      setOpenGroup('account');
     }
   }, [location.pathname]);
 
@@ -72,6 +77,8 @@ export default function Layout() {
       '/sensor-history': [{ label: 'Dữ liệu & Báo cáo', path: '/activity' }, { label: 'Lịch sử gửi dữ liệu' }],
       '/statistics': [{ label: 'Dữ liệu & Báo cáo', path: '/activity' }, { label: 'Thống kê hoạt động' }],
       '/threshold-management': [{ label: 'Trang chủ', path: '/' }, { label: 'Quản lý cấu hình ngưỡng' }],
+      '/account/me': [{ label: 'Quản lý tài khoản' }, { label: 'Tài khoản của tôi' }],
+      '/account/users': [{ label: 'Quản lý tài khoản' }, { label: 'Danh sách người dùng' }],
       '/account': [{ label: 'Quản lý tài khoản' }]
     };
     return paths[location.pathname] || [];
@@ -142,12 +149,25 @@ export default function Layout() {
             </NavLink>
           </NavGroup>
 
-          <div style={{ marginTop: '0.5rem' }}>
-            <NavLink to="/account" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
-              <Users className="nav-icon" />
-              Quản lý tài khoản
+          <NavGroup
+            groupId="account"
+            openGroup={openGroup}
+            setOpenGroup={setOpenGroup}
+            icon={Users}
+            title="Quản lý tài khoản"
+            activePaths={['/account/me', '/account/users']}
+          >
+            <NavLink to="/account/me" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
+              <UserCircle className="nav-icon" />
+              Tài khoản của tôi
             </NavLink>
-          </div>
+            {isAdmin && (
+              <NavLink to="/account/users" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
+                <UserCog className="nav-icon" />
+                Danh sách người dùng
+              </NavLink>
+            )}
+          </NavGroup>
 
         </nav>
 
