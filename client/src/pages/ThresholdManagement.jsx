@@ -59,7 +59,7 @@ export default function ThresholdManagement() {
           style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
           disabled={loading}
         >
-          <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
+          <RefreshCw size={18} className={loading ? 'animate-spin' : ''}/>
           Làm mới
         </button>
       </div>
