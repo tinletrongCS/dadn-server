@@ -95,6 +95,7 @@ class ResetPasswordSchema(BaseModel):
 class UserResponse(ICTBaseModel):
     user_id: UUID
     username: str
+    email: str
     full_name: str
     role_id: int
     is_active: bool
@@ -103,10 +104,21 @@ class UserResponse(ICTBaseModel):
 # /me
 class UserResponseMe(ICTBaseModel):
     username: str
+    email: str
     full_name: str
     role_id: int
     is_active: bool
     created_at: datetime
+
+# Người dùng thường tự cập nhật họ tên
+class UserUpdateFullName(BaseModel):
+    full_name: str
+
+# Admin cập nhật bất kỳ user
+class UserAdminUpdate(BaseModel):
+    full_name: Optional[str] = None
+    is_active: Optional[bool] = None
+    role_id: Optional[int] = None
 
 
 # 4. DEVICE
