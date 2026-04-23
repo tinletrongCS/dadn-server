@@ -247,28 +247,19 @@ export default function UserManagement() {
       )}
 
       {/* Stats */}
-      <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: '2rem', marginBottom: '1.5rem', flexWrap: 'wrap', borderBottom: '1px solid var(--border-color)', paddingBottom: '1.5rem' }}>
         {[
           { label: 'Tổng người dùng', value: users.length, icon: Users, color: '#6366f1' },
           { label: 'Đang hoạt động', value: users.filter(u => u.is_active).length, icon: UserCheck, color: '#10b981' },
           { label: 'Bị khóa', value: users.filter(u => !u.is_active).length, icon: UserX, color: '#ef4444' },
           { label: 'Admin', value: users.filter(u => u.role_id === 1).length, icon: Shield, color: '#f59e0b' },
         ].map(stat => (
-          <div key={stat.label} className="card" style={{
-            flex: '1 1 160px', display: 'flex', alignItems: 'center',
-            gap: '1rem', padding: '1rem 1.25rem'
-          }}>
-            <div style={{
-              width: 40, height: 40, borderRadius: '0.6rem',
-              background: `${stat.color}20`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center'
-            }}>
-              <stat.icon size={18} style={{ color: stat.color }} />
+          <div key={stat.label} style={{ flex: '1 1 120px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.25rem' }}>
+              <stat.icon size={14} style={{ color: stat.color }} />
+              {stat.label}
             </div>
-            <div>
-              <div style={{ fontSize: '1.5rem', fontWeight: 700, lineHeight: 1 }}>{stat.value}</div>
-              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>{stat.label}</div>
-            </div>
+            <div style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--text-main)' }}>{stat.value}</div>
           </div>
         ))}
       </div>
@@ -306,8 +297,8 @@ export default function UserManagement() {
                 <tr style={{ borderBottom: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.03)' }}>
                   {['Người dùng', 'Email', 'Vai trò', 'Trạng thái', 'Ngày tạo', 'Thao tác'].map(h => (
                     <th key={h} style={{
-                      padding: '0.85rem 1rem', textAlign: 'left',
-                      fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.8rem',
+                      padding: '0.6rem 1rem', textAlign: 'left',
+                      fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.75rem',
                       textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap'
                     }}>{h}</th>
                   ))}
@@ -327,13 +318,13 @@ export default function UserManagement() {
                       onMouseLeave={e => e.currentTarget.style.background = isMe ? 'rgba(16,185,129,0.05)' : 'transparent'}
                     >
                       {/* User info */}
-                      <td style={{ padding: '0.85rem 1rem' }}>
+                      <td style={{ padding: '0.5rem 1rem' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                           <div style={{
-                            width: 34, height: 34, borderRadius: '50%',
+                            width: 30, height: 30, borderRadius: '50%',
                             background: 'linear-gradient(135deg, #10b981, #059669)',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            fontWeight: 700, color: 'white', fontSize: '0.85rem', flexShrink: 0
+                            fontWeight: 700, color: 'white', fontSize: '0.8rem', flexShrink: 0
                           }}>
                             {(u.full_name || u.username)[0].toUpperCase()}
                           </div>
@@ -347,30 +338,30 @@ export default function UserManagement() {
                         </div>
                       </td>
 
-                      <td style={{ padding: '0.85rem 1rem', color: 'var(--text-muted)' }}>{u.email}</td>
-                      <td style={{ padding: '0.85rem 1rem' }}><BadgeRole roleId={u.role_id} /></td>
-                      <td style={{ padding: '0.85rem 1rem' }}><BadgeStatus isActive={u.is_active} /></td>
-                      <td style={{ padding: '0.85rem 1rem', color: 'var(--text-muted)', fontSize: '0.82rem', whiteSpace: 'nowrap' }}>
+                      <td style={{ padding: '0.5rem 1rem', color: 'var(--text-muted)' }}>{u.email}</td>
+                      <td style={{ padding: '0.5rem 1rem' }}><BadgeRole roleId={u.role_id} /></td>
+                      <td style={{ padding: '0.5rem 1rem' }}><BadgeStatus isActive={u.is_active} /></td>
+                      <td style={{ padding: '0.5rem 1rem', color: 'var(--text-muted)', fontSize: '0.8rem', whiteSpace: 'nowrap' }}>
                         {u.created_at ? new Date(u.created_at).toLocaleDateString('vi-VN') : '-'}
                       </td>
 
                       {/* Actions */}
-                      <td style={{ padding: '0.85rem 1rem' }}>
-                        <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+                      <td style={{ padding: '0.5rem 1rem' }}>
+                        <div style={{ display: 'flex', gap: '0.2rem', alignItems: 'center' }}>
                           {/* Edit */}
                           <button
                             onClick={() => setEditUser(u)}
                             title="Chỉnh sửa"
                             style={{
-                              background: 'rgba(99,102,241,0.12)', border: 'none',
-                              borderRadius: '0rem', padding: '0.4rem 0.6rem',
-                              cursor: 'pointer', color: '#6366f1',
-                              display: 'flex', alignItems: 'center', transition: 'background 0.15s'
+                              background: 'none', border: 'none',
+                              borderRadius: '0rem', padding: '0.4rem',
+                              cursor: 'pointer', color: 'var(--text-muted)',
+                              display: 'flex', alignItems: 'center', transition: 'color 0.15s'
                             }}
-                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(99,102,241,0.25)'}
-                            onMouseLeave={e => e.currentTarget.style.background = 'rgba(99,102,241,0.12)'}
+                            onMouseEnter={e => e.currentTarget.style.color = '#6366f1'}
+                            onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}
                           >
-                            <Edit2 size={14} />
+                            <Edit2 size={16} />
                           </button>
 
                           {/* Toggle status */}
@@ -380,17 +371,17 @@ export default function UserManagement() {
                               disabled={busy}
                               title={u.is_active ? 'Vô hiệu hóa' : 'Kích hoạt'}
                               style={{
-                                background: u.is_active ? 'rgba(239,68,68,0.12)' : 'rgba(16,185,129,0.12)',
+                                background: 'none',
                                 border: 'none', borderRadius: '0rem',
-                                padding: '0.4rem 0.6rem', cursor: busy ? 'not-allowed' : 'pointer',
-                                color: u.is_active ? '#ef4444' : '#10b981',
-                                display: 'flex', alignItems: 'center', transition: 'background 0.15s',
+                                padding: '0.4rem', cursor: busy ? 'not-allowed' : 'pointer',
+                                color: 'var(--text-muted)',
+                                display: 'flex', alignItems: 'center', transition: 'color 0.15s',
                                 opacity: busy ? 0.6 : 1
                               }}
-                              onMouseEnter={e => { if (!busy) e.currentTarget.style.background = u.is_active ? 'rgba(239,68,68,0.25)' : 'rgba(16,185,129,0.25)'; }}
-                              onMouseLeave={e => e.currentTarget.style.background = u.is_active ? 'rgba(239,68,68,0.12)' : 'rgba(16,185,129,0.12)'}
+                              onMouseEnter={e => { if (!busy) e.currentTarget.style.color = u.is_active ? '#ef4444' : '#10b981'; }}
+                              onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}
                             >
-                              {u.is_active ? <UserX size={14} /> : <UserCheck size={14} />}
+                              {u.is_active ? <UserX size={16} /> : <UserCheck size={16} />}
                             </button>
                           )}
 
@@ -400,15 +391,15 @@ export default function UserManagement() {
                               onClick={() => setDeleteUser(u)}
                               title="Xóa người dùng"
                               style={{
-                                background: 'rgba(239,68,68,0.1)', border: 'none',
-                                borderRadius: '0rem', padding: '0.4rem 0.6rem',
-                                cursor: 'pointer', color: '#ef4444',
-                                display: 'flex', alignItems: 'center', transition: 'background 0.15s'
+                                background: 'none', border: 'none',
+                                borderRadius: '0rem', padding: '0.4rem',
+                                cursor: 'pointer', color: 'var(--text-muted)',
+                                display: 'flex', alignItems: 'center', transition: 'color 0.15s'
                               }}
-                              onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.22)'}
-                              onMouseLeave={e => e.currentTarget.style.background = 'rgba(239,68,68,0.1)'}
+                              onMouseEnter={e => e.currentTarget.style.color = '#ef4444'}
+                              onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}
                             >
-                              <Trash2 size={14} />
+                              <Trash2 size={16} />
                             </button>
                           )}
 

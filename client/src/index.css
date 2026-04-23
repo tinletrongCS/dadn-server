@@ -1,5 +1,10 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 
+html {
+  zoom: 0.85;
+  background-color: var(--bg-color); /* Tránh bị "flash" màu xanh khi reload trang */
+}
+
 :root {
   --primary-green: #16a34a;
   --primary-green-dark: #16a34a;
@@ -32,6 +37,8 @@ body {
   background-color: var(--bg-color);
   color: var(--text-main);
   -webkit-font-smoothing: antialiased;
+  overflow: hidden; /* Ngăn trình duyệt scroll cả trang */
+  height: 100%;
 }
 
 /* Authentication Layouts */
@@ -78,9 +85,11 @@ body {
   0% {
     transform: scale(1);
   }
+
   50% {
     transform: scale(1.05);
   }
+
   100% {
     transform: scale(1);
   }
@@ -236,10 +245,11 @@ body {
 
 /* Dashboard Layout */
 .dashboard-layout {
-  min-height: 100vh;
+  height: 117.7vh; /* Khớp chính xác chiều cao màn hình khi zoom 0.85 (100/0.85) */
   display: flex;
   flex-direction: row;
   background-color: var(--bg-color);
+  overflow: hidden;
 }
 
 .sidebar {
@@ -250,6 +260,19 @@ body {
   flex-direction: column;
   flex-shrink: 0;
   color: var(--sidebar-text);
+  position: relative;
+}
+
+/* Kéo dài màu nền của sidebar xuống tận cùng để không bị hở khi zoom */
+.sidebar::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: -1000px;
+  left: 0;
+  right: 0;
+  background: var(--sidebar-bg);
+  z-index: -1;
 }
 
 .sidebar-header {
@@ -372,6 +395,7 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  height: 100%;
 }
 
 .dashboard-header {
@@ -381,7 +405,7 @@ body {
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
   border-bottom: 1px solid #1e293b;
   color: white;
 }
@@ -916,8 +940,13 @@ body {
 
 /* Spin animation for refresh */
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .spin {
@@ -980,7 +1009,7 @@ body {
   border-radius: 50%;
   background: white;
   transition: left 0.2s;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .toggle-switch.toggle-on .toggle-thumb::after {
@@ -1139,6 +1168,3 @@ body {
   color: var(--primary-green);
   border-bottom-color: var(--primary-green);
 }
-
-
-
