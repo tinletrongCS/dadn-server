@@ -10,7 +10,7 @@ export default function Overview() {
         <img
           src="/farm-banner.jpeg"
           alt="Smart Farm Banner"
-          style={{ width: '100%', height: '430px', objectFit: 'cover', objectPosition: 'center top', display: 'block' }}
+          style={{ width: '100%', height: '490px', objectFit: 'cover', objectPosition: 'center top', display: 'block' }}
         />
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(to right, rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.2))', display: 'flex', alignItems: 'center', padding: '3rem' }}>
           <div style={{ color: 'white', maxWidth: '600px' }}>
