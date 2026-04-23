@@ -171,6 +171,24 @@ class DeviceStatusResponse(BaseModel):
     fan_status: bool
     last_seen: Optional[datetime] = None
     
+class UserDeviceResponse(ICTBaseModel):
+    id: int
+    user_id: UUID
+    username: Optional[str] = None
+    device_id: int
+    device_name: Optional[str] = None
+    is_active: bool
+    temp_min: Optional[float] = None
+    temp_max: Optional[float] = None
+    humid_min: Optional[float] = None
+    humid_max: Optional[float] = None
+    soil_min: Optional[float] = None
+    soil_max: Optional[float] = None
+    light_min: Optional[int] = None
+    light_max: Optional[int] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
 # 5. SENSOR DATA VÀ ACTIVITY LOGS
 class SensorDataResponse(ICTBaseModel):
     id: int
