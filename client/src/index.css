@@ -253,7 +253,8 @@ body {
 }
 
 .sidebar-header {
-  padding: 1.5rem;
+  height: 64px;
+  padding: 0 1.5rem;
   border-bottom: 1px solid #1e293b;
   display: flex;
   align-items: center;
@@ -375,13 +376,13 @@ body {
 
 .dashboard-header {
   background: #111827;
-  padding: 1rem 2rem;
+  height: 64px;
+  padding: 0 2rem;
   display: flex;
   justify-content: flex-end;
   align-items: center;
   box-shadow: 0 1px 3px rgba(0,0,0,0.2);
   border-bottom: 1px solid #1e293b;
-  height: 73px;
   color: white;
 }
 
