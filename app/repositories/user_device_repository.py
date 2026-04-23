@@ -46,3 +46,33 @@ def get_active_global_for_device(db: Session, device_id: int) -> UserDevice | No
         UserDevice.device_id == device_id,
         UserDevice.is_active == True
     ).first()
+
+from models.domain_models import UserDevice, User, Device
+
+def get_user_threshold(db: Session, user_id: str) -> list[UserDevice]:
+    results = db.query(UserDevice, User.username, Device.name.label("device_name")).join(
+        User, UserDevice.user_id == User.user_id
+    ).join(
+        Device, UserDevice.device_id == Device.device_id
+    ).filter(UserDevice.user_id == user_id).all()
+    
+    final_results = []
+    for ud, uname, dname in results:
+        ud.username = uname
+        ud.device_name = dname
+        final_results.append(ud)
+    return final_results
+
+def get_all_user_threshold(db: Session) -> list[UserDevice]:
+    results = db.query(UserDevice, User.username, Device.name.label("device_name")).join(
+        User, UserDevice.user_id == User.user_id
+    ).join(
+        Device, UserDevice.device_id == Device.device_id
+    ).all()
+    
+    final_results = []
+    for ud, uname, dname in results:
+        ud.username = uname
+        ud.device_name = dname
+        final_results.append(ud)
+    return final_results

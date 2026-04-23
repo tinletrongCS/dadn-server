@@ -7,7 +7,8 @@ from models.domain_models import Device, User
 from dependencies.auth_deps import get_current_user, require_admin, get_device_or_404, require_active_device
 from schemas.domain_schemas import (
     DeviceResponse, DeviceStatusResponse, MessageResponse, 
-    DeviceCreateUpdate, DeviceUpdate, ThresholdUpdate, ModeUpdate, ActiveDeviceResponse
+    DeviceCreateUpdate, DeviceUpdate, ThresholdUpdate, ModeUpdate, ActiveDeviceResponse,
+    UserDeviceResponse
 )
 from services import device_service
 
@@ -38,6 +39,17 @@ async def create_device(
     current_user: User = Depends(require_admin)
 ):
     return await device_service.create_device(db, device_in, current_user)
+
+# 12. Lấy dữ liệu ngưỡng trong user_device cho người dùng hiện tại (nếu admin thì lấy tất cả)
+# Done
+@router.get("/user-threshold", response_model=List[UserDeviceResponse])
+async def get_user_threshold(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    if current_user.role_id == 1:
+        return await device_service.get_all_user_threshold(db)
+    return await device_service.get_user_threshold(db, current_user)
 
 # 3. Xem chi tiết 1 thiết bị (UC10A)
 # Done
@@ -144,3 +156,4 @@ async def check_active_device(
     current_user: User = Depends(get_current_user)
 ):
     return await device_service.check_active_device(db, device, current_user)
+

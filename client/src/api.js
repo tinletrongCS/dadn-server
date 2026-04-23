@@ -1,5 +1,5 @@
-// const API_BASE_URL = "http://localhost:8000";
-const API_BASE_URL = "https://smart-farm-dadn.onrender.com";
+const API_BASE_URL = "http://localhost:8000";
+// const API_BASE_URL = "https://smart-farm-dadn.onrender.com";
 
 // Helper for authenticated requests
 async function authFetch(url, token, options = {}) {
@@ -138,6 +138,10 @@ export async function createDevice(token, deviceData) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(deviceData),
   });
+}
+
+export async function fetchUserThresholds(token) {
+  return authFetch(`${API_BASE_URL}/devices/user-threshold`, token);
 }
 
 // ==================== CONTROL ====================

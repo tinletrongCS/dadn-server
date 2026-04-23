@@ -2,7 +2,7 @@
 
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
-from models.domain_models import Device, User
+from models.domain_models import Device, User, UserDevice
 from schemas.domain_schemas import DeviceCreateUpdate, DeviceUpdate, ThresholdUpdate, ModeUpdate
 from repositories import device_repository, log_repository, user_device_repository
 from mqtt.client import publish_command
@@ -11,11 +11,15 @@ from core.config import settings
 def _log_action(db: Session, user: User, device_id: str, action_type: str, desc: str):
     log_repository.create(db, user.user_id, device_id, action_type, desc)
 
+async def get_user_threshold(db: Session, current_user: User) -> list[UserDevice]:
+    return user_device_repository.get_user_threshold(db, current_user.user_id)
+
+async def get_all_user_threshold(db: Session) -> list[UserDevice]:
+    return user_device_repository.get_all_user_threshold(db)
 
 async def get_all_devices(db: Session, current_user: User) -> list[Device]:
     return device_repository.get_all(db)
  
-
 async def create_device(db: Session, device_in: DeviceCreateUpdate, current_user: User) -> Device:
     if device_repository.get_by_name(db, device_in.name):
         raise HTTPException(status_code=400, detail="Mã thiết bị này đã tồn tại")
@@ -23,7 +27,6 @@ async def create_device(db: Session, device_in: DeviceCreateUpdate, current_user
     new_device = device_repository.create(db, device_in.model_dump())
     _log_action(db, current_user, new_device.device_id, "DEVICE_CREATED", f"Admin thêm thiết bị {new_device.name}")
     return new_device
-
 
 async def get_device(db: Session, device: Device, current_user: User) -> Device:
     _log_action(db, current_user, device.device_id, "DEVICE_DETAILS_VIEWED", f"{current_user.username} xem t/tin chi tiết thiết bị {device.name}")
@@ -39,7 +42,6 @@ async def get_active_device(db:Session, current_user: User) -> list[dict]:
         result.append(device_data)
     return result
 
-
 async def update_device(db: Session, device_id: str, device_in: DeviceUpdate, current_user: User) -> Device:
     device = device_repository.get_by_id(db, device_id)
     if not device:
@@ -49,17 +51,14 @@ async def update_device(db: Session, device_id: str, device_in: DeviceUpdate, cu
     _log_action(db, current_user, device_id, "DEVICE_UPDATED", f"Cập nhật tên thiết bị thành {updated_device.name}")
     return updated_device
 
-
 async def delete_device(db: Session, device: Device, current_user: User) -> None:
     device_id = device.device_id
     device_repository.delete(db, device)
     _log_action(db, current_user, device_id, "DEVICE_DELETED", "Đã xóa thiết bị khỏi hệ thống")
 
-
 async def get_device_status(db: Session, device: Device, current_user: User) -> Device:
     _log_action(db, current_user, device.device_id, "DEVICE_STATUS_VIEWED", f"{current_user.username} xem trạng thái thiết bị {device.name}")
     return device
-
 
 async def update_threshold(db: Session, device: Device, thresholds: ThresholdUpdate, current_user: User) -> Device:
     update_data = thresholds.model_dump(exclude_unset=True)
@@ -75,7 +74,6 @@ async def update_threshold(db: Session, device: Device, thresholds: ThresholdUpd
         
     _log_action(db, current_user, device.device_id, "THRESHOLD_UPDATE", f"{current_user.username} cập nhật ngưỡng môi trường cá nhân cho thiết bị {device.name}")
     return device
-
 
 async def change_mode(db: Session, device: Device, mode_in: ModeUpdate, current_user: User) -> Device:
     if mode_in.mode not in ["auto", "manual"]:
@@ -93,7 +91,6 @@ async def change_mode(db: Session, device: Device, mode_in: ModeUpdate, current_
             detail=f"Gửi lệnh tới thiết bị thất bại: {e}"
         )
     return updated_device
-
 
 async def select_device(db: Session, device: Device, current_user: User) -> dict:
     device_id = device.device_id

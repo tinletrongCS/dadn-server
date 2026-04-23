@@ -12,6 +12,7 @@ import Statistics from './pages/Statistics'
 import SensorHistory from './pages/SensorHistory'
 import Overview from './pages/Overview'
 import AddDevice from './pages/AddDevice'
+import ThresholdManagement from './pages/ThresholdManagement'
 import './App.css'
 
 function ProtectedRoute({ children }) {
@@ -56,6 +57,7 @@ function App() {
         <Route path="statistics" element={<Statistics />} />
         <Route path="sensor-history" element={<SensorHistory />} />
         <Route path="devices" element={<Devices />} />
+        <Route path="threshold-management" element={<ThresholdManagement />} />
         <Route path="devices/add" element={
           <AdminRoute>
             <AddDevice />
