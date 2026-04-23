@@ -174,3 +174,42 @@ export async function fetchSensorHistory(token, deviceId, fromTime, toTime) {
   params.set("to_time", toTime);
   return authFetch(`${API_BASE_URL}/sensors/${deviceId}/history?${params.toString()}`, token);
 }
+
+// ==================== USERS ====================
+
+export async function fetchUsers(token) {
+  return authFetch(`${API_BASE_URL}/users`, token);
+}
+
+export async function fetchUserById(token, userId) {
+  return authFetch(`${API_BASE_URL}/users/${userId}`, token);
+}
+
+export async function updateMyProfile(token, data) {
+  return authFetch(`${API_BASE_URL}/users/me`, token, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+}
+
+export async function adminUpdateUser(token, userId, data) {
+  return authFetch(`${API_BASE_URL}/users/${userId}`, token, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+}
+
+export async function adminToggleUserStatus(token, userId) {
+  return authFetch(`${API_BASE_URL}/users/${userId}/toggle-status`, token, {
+    method: "PATCH",
+  });
+}
+
+export async function adminDeleteUser(token, userId) {
+  return authFetch(`${API_BASE_URL}/users/${userId}`, token, {
+    method: "DELETE",
+  });
+}
+
