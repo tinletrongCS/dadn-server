@@ -14,7 +14,8 @@ import {
   ChevronRight,
   Database,
   PlusCircle,
-  Home
+  Home,
+  Sliders
 } from 'lucide-react';
 
 function NavGroup({ icon: Icon, title, children, activePaths = [], groupId, openGroup, setOpenGroup }) {
@@ -51,7 +52,7 @@ export default function Layout() {
   const [openGroup, setOpenGroup] = useState(null);
 
   React.useEffect(() => {
-    const homePaths = ['/', '/dashboard', '/devices', '/devices/add'];
+    const homePaths = ['/', '/dashboard', '/devices', '/devices/add', '/threshold-management'];
     const dataPaths = ['/activity', '/statistics', '/sensor-history'];
     
     if (homePaths.some(p => location.pathname === p || location.pathname.startsWith(`${p}/`))) {
@@ -70,6 +71,7 @@ export default function Layout() {
       '/activity': [{ label: 'Dữ liệu & Báo cáo', path: '/activity' }, { label: 'Lịch sử hoạt động' }],
       '/sensor-history': [{ label: 'Dữ liệu & Báo cáo', path: '/activity' }, { label: 'Lịch sử gửi dữ liệu' }],
       '/statistics': [{ label: 'Dữ liệu & Báo cáo', path: '/activity' }, { label: 'Thống kê hoạt động' }],
+      '/threshold-management': [{ label: 'Trang chủ', path: '/' }, { label: 'Quản lý cấu hình ngưỡng' }],
       '/account': [{ label: 'Quản lý tài khoản' }]
     };
     return paths[location.pathname] || [];
@@ -105,6 +107,10 @@ export default function Layout() {
             <NavLink to="/devices" className={({ isActive }) => isActive && location.pathname === '/devices' ? "nav-item active" : "nav-item"} end>
               <Cpu className="nav-icon" />
               {isAdmin ? 'Quản lý thiết bị' : 'Cài đặt ngưỡng'}
+            </NavLink>
+            <NavLink to="/threshold-management" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
+              <Sliders className="nav-icon" />
+              Quản lý ngưỡng
             </NavLink>
             {isAdmin && (
               <NavLink to="/devices/add" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
