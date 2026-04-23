@@ -187,7 +187,7 @@ export default function ThresholdManagement() {
         }
         .badge {
           padding: 0.25rem 0.75rem;
-          border-radius: 9999px;
+          border-radius: 0px;
           font-size: 0.75rem;
           font-weight: 600;
         }
@@ -199,7 +199,7 @@ export default function ThresholdManagement() {
         .badge-secondary {
           background: rgba(148, 163, 184, 0.1);
           color: #94a3b8;
-          border: 1px solid rgba(148, 163, 184, 0.2);
+          border: 0px solid rgba(148, 163, 184, 0.2);
         }
         .animate-spin {
           animation: spin 1s linear infinite;
@@ -224,7 +224,7 @@ export default function ThresholdManagement() {
         .search-input {
           width: 100%;
           padding: 0.875rem 1rem 0.875rem 3rem;
-          border-radius: 9999px;
+          border-radius:0px;
           border: 1px solid #e2e8f0;
           background-color: #f8fafc;
           font-size: 0.95rem;
