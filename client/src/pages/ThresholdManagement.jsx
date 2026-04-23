@@ -84,15 +84,15 @@ export default function ThresholdManagement() {
         )}
 
         <div className="table-responsive">
-          <table className="data-table">
+          <table className="data-table compact-table">
             <thead>
               <tr>
                 <th><div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Cpu size={16} /> Thiết bị</div></th>
                 {isAdmin && <th><div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><User size={16} /> Người dùng</div></th>}
-                <th><div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Thermometer size={16} color="#ef4444" /> Nhiệt độ (°C)</div></th>
-                <th><div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Droplets size={16} color="#3b82f6" /> Độ ẩm không khí (%)</div></th>
-                <th><div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Droplets size={16} color="#10b981" /> Độ ẩm đất (%)</div></th>
-                <th><div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Sun size={16} color="#f59e0b" /> Ánh sáng (lx)</div></th>
+                <th><div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}> Nhiệt độ (°C)</div></th>
+                <th><div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}> Độ ẩm không khí (%)</div></th>
+                <th><div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}> Độ ẩm đất (%)</div></th>
+                <th><div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}> Ánh sáng (lx)</div></th>
                 <th>Trạng thái</th>
               </tr>
             </thead>
@@ -114,16 +114,14 @@ export default function ThresholdManagement() {
                 filteredThresholds.map((t) => (
                   <tr key={t.id}>
                     <td style={{ fontWeight: 600 }}>
-                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <span>{t.device_name || `Thiết bị ${t.device_id}`}</span>
-                        <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 400 }}>ID: {t.device_id}</span>
+                        <span style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 400, background: '#f1f5f9', padding: '1px 6px', borderRadius: '4px' }}>#{t.device_id}</span>
                       </div>
                     </td>
                     {isAdmin && (
                       <td>
-                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                          <span style={{ fontWeight: 500 }}>{t.username || 'Không xác định'}</span>
-                        </div>
+                        <span style={{ fontWeight: 500 }}>{t.username || 'Không xác định'}</span>
                       </td>
                     )}
                     <td>
@@ -168,6 +166,11 @@ export default function ThresholdManagement() {
       </div>
 
       <style jsx>{`
+        .compact-table th, .compact-table td {
+          padding: 0.4rem 0.75rem;
+          border: 1px solid #e2e8f0;
+          vertical-align: middle;
+        }
         .threshold-range {
           display: flex;
           align-items: center;
@@ -187,7 +190,7 @@ export default function ThresholdManagement() {
         }
         .badge {
           padding: 0.25rem 0.75rem;
-          border-radius: 9999px;
+          border-radius: 0px;
           font-size: 0.75rem;
           font-weight: 600;
         }
@@ -199,7 +202,7 @@ export default function ThresholdManagement() {
         .badge-secondary {
           background: rgba(148, 163, 184, 0.1);
           color: #94a3b8;
-          border: 1px solid rgba(148, 163, 184, 0.2);
+          border: 0px solid rgba(148, 163, 184, 0.2);
         }
         .animate-spin {
           animation: spin 1s linear infinite;
@@ -224,7 +227,7 @@ export default function ThresholdManagement() {
         .search-input {
           width: 100%;
           padding: 0.875rem 1rem 0.875rem 3rem;
-          border-radius: 9999px;
+          border-radius:0px;
           border: 1px solid #e2e8f0;
           background-color: #f8fafc;
           font-size: 0.95rem;
