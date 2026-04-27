@@ -1,7 +1,15 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { registerUser } from "../api";
-import { Leaf } from "lucide-react";
+import {
+  Leaf,
+  User,
+  Mail,
+  Lock,
+  UserPlus,
+  RefreshCcw,
+  CheckCircle,
+} from "lucide-react";
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -26,7 +34,7 @@ export default function Register() {
     setSuccess(false);
 
     if (formData.password !== formData.confirm_password) {
-      setError("Passwords do not match.");
+      setError("Mật khẩu xác nhận không khớp.");
       return;
     }
 
@@ -41,7 +49,7 @@ export default function Register() {
       setSuccess(true);
       setTimeout(() => navigate("/login"), 2000);
     } catch (err) {
-      setError(err.message || "Failed to register account.");
+      setError(err.message || "Đăng ký tài khoản thất bại. Vui lòng thử lại.");
     } finally {
       setLoading(false);
     }
@@ -50,67 +58,167 @@ export default function Register() {
   return (
     <div className="auth-layout">
       <div className="auth-card register-card">
-        <div className="auth-header">
-          <Leaf className="logo-icon" />
-          <h1>Yolo Farm</h1>
+        <div
+          className="auth-header"
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "0.5rem",
+            marginBottom: "1.5rem",
+          }}
+        >
+          <div
+            style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}
+          >
+            <Leaf size={32} className="primary-green" />
+            <h1 style={{ margin: 0 }}>Yolo Farm</h1>
+          </div>
+          <span
+            style={{
+              color: "var(--text-muted)",
+              fontSize: "0.95rem",
+              fontWeight: 500,
+            }}
+          >
+            Hệ thống nông trại thông minh
+          </span>
         </div>
 
         <div className="auth-body">
-          <h2>Tạo tài khoản</h2>
-          <p className="subtitle">
-            Tham gia Yolo Farm và quản lý mọi thứ một cách dễ dàng.
+          <h2 style={{ marginBottom: "0.5rem" }}>Tạo tài khoản</h2>
+          <p
+            className="subtitle"
+            style={{ color: "var(--text-muted)", marginBottom: "1.5rem" }}
+          >
+            Tham gia Yolo Farm và quản lý thiết bị dễ dàng.
           </p>
 
-          {error && <div className="auth-error">{error}</div>}
+          {error && (
+            <div
+              className="auth-error"
+              style={{
+                padding: "0.75rem",
+                background: "#fee2e2",
+                color: "#b91c1c",
+                borderRadius: "4px",
+                marginBottom: "1rem",
+                fontSize: "0.9rem",
+              }}
+            >
+              {error}
+            </div>
+          )}
+
           {success && (
-            <div className="auth-success">
-              Đăng ký thành công! Đang chuyển hướng đến trang đăng nhập...
+            <div
+              className="auth-success"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "0.5rem",
+                padding: "0.75rem",
+                background: "#dcfce3",
+                color: "#166534",
+                borderRadius: "4px",
+                marginBottom: "1rem",
+                fontSize: "0.9rem",
+              }}
+            >
+              <CheckCircle size={18} /> Đăng ký thành công! Đang chuyển hướng...
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="auth-form">
-            <div className="form-group">
-              <label htmlFor="full_name">Họ và tên</label>
+            <div className="form-group" style={{ marginBottom: "1rem" }}>
+              <label
+                htmlFor="full_name"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  marginBottom: "0.5rem",
+                  fontWeight: 600,
+                }}
+              >
+                <User size={16} /> Họ và tên
+              </label>
               <input
                 type="text"
                 id="full_name"
                 name="full_name"
-                placeholder="Vd: Nguyễn Văn A"
+                placeholder="Nhập họ và tên đầy đủ"
                 value={formData.full_name}
                 onChange={handleChange}
                 required
               />
             </div>
 
-            <div className="form-group">
-              <label htmlFor="username">Tên đăng nhập</label>
+            <div className="form-group" style={{ marginBottom: "1rem" }}>
+              <label
+                htmlFor="username"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  marginBottom: "0.5rem",
+                  fontWeight: 600,
+                }}
+              >
+                <User size={16} /> Tên đăng nhập
+              </label>
               <input
                 type="text"
                 id="username"
                 name="username"
-                placeholder="Vd: nguyenvana123"
+                placeholder="Nhập tên đăng nhập"
                 value={formData.username}
                 onChange={handleChange}
                 required
               />
             </div>
 
-            <div className="form-group">
-              <label htmlFor="email">Email</label>
+            <div className="form-group" style={{ marginBottom: "1rem" }}>
+              <label
+                htmlFor="email"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  marginBottom: "0.5rem",
+                  fontWeight: 600,
+                }}
+              >
+                <Mail size={16} /> Email
+              </label>
               <input
                 type="email"
                 id="email"
                 name="email"
-                placeholder="Vd: a.nv@gmail.com"
+                placeholder="Nhập địa chỉ email"
                 value={formData.email}
                 onChange={handleChange}
                 required
               />
             </div>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="password">Mật khẩu</label>
+            <div
+              className="form-row"
+              style={{ display: "flex", gap: "1rem", marginBottom: "1.5rem" }}
+            >
+              <div className="form-group" style={{ flex: 1 }}>
+                <label
+                  htmlFor="password"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    marginBottom: "0.5rem",
+                    fontWeight: 600,
+                  }}
+                >
+                  <Lock size={16} /> Mật khẩu
+                </label>
                 <input
                   type="password"
                   id="password"
@@ -121,8 +229,19 @@ export default function Register() {
                   required
                 />
               </div>
-              <div className="form-group">
-                <label htmlFor="confirm_password">Xác nhận mật khẩu</label>
+              <div className="form-group" style={{ flex: 1 }}>
+                <label
+                  htmlFor="confirm_password"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    marginBottom: "0.5rem",
+                    fontWeight: 600,
+                  }}
+                >
+                  <Lock size={16} /> Xác nhận mật khẩu
+                </label>
                 <input
                   type="password"
                   id="confirm_password"
@@ -139,13 +258,35 @@ export default function Register() {
               type="submit"
               disabled={loading}
               className="btn-primary"
-              style={{ marginTop: "0.5rem" }}
+              style={{
+                width: "100%",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: "0.5rem",
+                padding: "0.75rem",
+              }}
             >
-              {loading ? "Đang đăng ký..." : "Đăng ký"}
+              {loading ? (
+                <>
+                  <RefreshCw size={18} className="spin" /> Đang xử lý...
+                </>
+              ) : (
+                <>
+                  <UserPlus size={18} /> Đăng ký
+                </>
+              )}
             </button>
           </form>
 
-          <div className="auth-footer">
+          <div
+            className="auth-footer"
+            style={{
+              marginTop: "1.5rem",
+              textAlign: "center",
+              fontSize: "0.9rem",
+            }}
+          >
             <p>
               Đã có tài khoản? <Link to="/login">Đăng nhập</Link>
             </p>
