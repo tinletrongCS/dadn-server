@@ -1,5 +1,6 @@
-const API_BASE_URL = "http://localhost:8000";
-// const API_BASE_URL = "https://smart-farm-dadn.onrender.com";
+// const API_BASE_URL = "http://localhost:8000";
+const API_BASE_URL = "https://smart-farm-dadn.onrender.com";
+const WS_BASE_URL = API_BASE_URL.replace(/^http/, "ws");
 
 // Helper for authenticated requests
 async function authFetch(url, token, options = {}) {
@@ -211,5 +212,38 @@ export async function adminDeleteUser(token, userId) {
   return authFetch(`${API_BASE_URL}/users/${userId}`, token, {
     method: "DELETE",
   });
+}
+
+// ==================== WEBSOCKET NOTIFICATIONS ====================
+
+export function createNotificationSocket(token, { onMessage, onOpen, onClose, onError } = {}) {
+  if (!token) return null;
+
+  const socket = new WebSocket(`${WS_BASE_URL}/ws?token=${encodeURIComponent(token)}`);
+
+  socket.onopen = event => {
+    onOpen?.(event);
+  };
+
+  socket.onmessage = event => {
+    try {
+      const payload = JSON.parse(event.data);
+      if (payload.type !== "PONG") {
+        onMessage?.(payload);
+      }
+    } catch {
+      onMessage?.({ type: "MESSAGE", severity: "info", message: event.data });
+    }
+  };
+
+  socket.onclose = event => {
+    onClose?.(event);
+  };
+
+  socket.onerror = event => {
+    onError?.(event);
+  };
+
+  return socket;
 }
 
