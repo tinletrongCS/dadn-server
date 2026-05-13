@@ -1,5 +1,6 @@
 import React from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
+import { Loader2 } from "lucide-react";
 import { useAuth } from './context/AuthContext'
 import Login from './pages/Login'
 import Register from './pages/Register'
@@ -20,7 +21,14 @@ import './App.css'
 function ProtectedRoute({ children }) {
   const { token, loading } = useAuth();
   
-  if (loading) return <div className="loading-screen">Loading...</div>;
+  if (loading) {
+  return (
+    <div className="loading-screen">
+      <Loader2 size={40} className="spin" />
+      <span style={{ marginTop: "1rem", fontSize: "1.1rem" }}>Đang tải dữ liệu...</span>
+    </div>
+  );
+}
   if (!token) return <Navigate to="/login" replace />;
   
   return children;
@@ -29,7 +37,14 @@ function ProtectedRoute({ children }) {
 function AdminRoute({ children }) {
   const { user, loading } = useAuth();
 
-  if (loading) return <div className="loading-screen">Loading...</div>;
+  if (loading) {
+  return (
+    <div className="loading-screen">
+      <Loader2 size={40} className="spin" />
+      <span style={{ marginTop: "1rem", fontSize: "1.1rem" }}>Đang tải dữ liệu...</span>
+    </div>
+  );
+}
   
   // role_id = 1 is admin, role_id = 2 is normal user
   const isAdmin = user?.role_id === 1;

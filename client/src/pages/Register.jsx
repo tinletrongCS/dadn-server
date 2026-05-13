@@ -1,15 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { registerUser } from "../api";
-import {
-  Leaf,
-  User,
-  Mail,
-  Lock,
-  UserPlus,
-  RefreshCcw,
-  CheckCircle,
-} from "lucide-react";
+import { Leaf, User, Mail, Lock, UserPlus, RefreshCw, CheckCircle } from "lucide-react";
+import regImg from '../assets/regimg.webp';
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -22,7 +15,14 @@ export default function Register() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -56,243 +56,211 @@ export default function Register() {
   };
 
   return (
-    <div className="auth-layout">
-      <div className="auth-card register-card">
+    <>
+      <style>{skeletonStyles}</style>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "row-reverse",
+          minHeight: "117.7vh",
+          margin: 0,
+          padding: 0,
+          overflow: "hidden", 
+          opacity: mounted ? 1 : 0,
+          transform: mounted ? "translateY(0)" : "translateY(20px)",
+          transition: "opacity 0.6s ease-out, transform 0.6s ease-out",
+        }}
+      >
+        {/* Form Side */}
         <div
-          className="auth-header"
+          className="auth-layout"
           style={{
+            flex: "1",
             display: "flex",
-            flexDirection: "column",
+            justifyContent: "center",
             alignItems: "center",
-            gap: "0.5rem",
-            marginBottom: "1.5rem",
+            padding: "2rem",
           }}
         >
-          <div
-            style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}
-          >
-            <Leaf size={32} className="primary-green" />
-            <h1 style={{ margin: 0 }}>Yolo Farm</h1>
+          <div className="auth-card register-card" style={{ width: "100%", maxWidth: "480px", boxShadow: "none" }}>
+            <div className="auth-header" style={{ marginBottom: "2rem" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.5rem"  }}>
+                <Leaf size={32} className="primary-green" />
+                <h1 style={{ margin: 0 }}>Yolo Farm</h1>
+              </div>
+              <span style={{ color: "var(--text-muted)", fontSize: "0.95rem", fontWeight: 500 }}>
+                Hệ thống nông trại thông minh
+              </span>
+            </div>
+
+            <div className="auth-body">
+              <h2 style={{ fontSize: "1.8rem", marginBottom: "0.5rem" }}>Tạo tài khoản mới</h2>
+              <p className="subtitle" style={{ color: "var(--text-muted)", marginBottom: "2rem" }}>
+                Tham gia Yolo Farm để quản lý thiết bị dễ dàng và hiệu quả.
+              </p>
+
+              {error && <div className="auth-error" style={errorStyle}>{error}</div>}
+
+              {success && (
+                <div className="auth-success" style={successStyle}>
+                  <CheckCircle size={18} /> Đăng ký thành công! Đang chuyển hướng...
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit} className="auth-form">
+                <div className="form-group" style={{ marginBottom: "1.2rem" }}>
+                  <label htmlFor="full_name" style={labelStyle}>
+                    <User size={16} /> Họ và tên
+                  </label>
+                  <input
+                    type="text"
+                    id="full_name"
+                    name="full_name"
+                    placeholder="Nhập họ và tên đầy đủ"
+                    value={formData.full_name}
+                    onChange={handleChange}
+                    required
+                    style={inputStyle}
+                  />
+                </div>
+
+                <div style={{ display: "flex", gap: "1rem", marginBottom: "1.2rem" }}>
+                  <div className="form-group" style={{ flex: 1 }}>
+                    <label htmlFor="username" style={labelStyle}>
+                      <User size={16} /> Tên đăng nhập
+                    </label>
+                    <input
+                      type="text"
+                      id="username"
+                      name="username"
+                      placeholder="Tên đăng nhập"
+                      value={formData.username}
+                      onChange={handleChange}
+                      required
+                      style={inputStyle}
+                    />
+                  </div>
+
+                  <div className="form-group" style={{ flex: 1 }}>
+                    <label htmlFor="email" style={labelStyle}>
+                      <Mail size={16} /> Email
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      placeholder="Địa chỉ email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      required
+                      style={inputStyle}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: "flex", gap: "1rem", marginBottom: "2rem" }}>
+                  <div className="form-group" style={{ flex: 1 }}>
+                    <label htmlFor="password" style={labelStyle}>
+                      <Lock size={16} /> Mật khẩu
+                    </label>
+                    <input
+                      type="password"
+                      id="password"
+                      name="password"
+                      placeholder="Tạo mật khẩu"
+                      value={formData.password}
+                      onChange={handleChange}
+                      required
+                      style={inputStyle}
+                    />
+                  </div>
+                  <div className="form-group" style={{ flex: 1 }}>
+                    <label htmlFor="confirm_password" style={labelStyle}>
+                      <Lock size={16} /> Xác nhận
+                    </label>
+                    <input
+                      type="password"
+                      id="confirm_password"
+                      name="confirm_password"
+                      placeholder="Xác nhận mật khẩu"
+                      value={formData.confirm_password}
+                      onChange={handleChange}
+                      required
+                      style={inputStyle}
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="btn-primary"
+                  style={buttonStyle}
+                >
+                  {loading ? (
+                    <>
+                      <RefreshCw size={18} className="spin" style={{ animation: "spin 1s linear infinite" }} /> Đang xử lý...
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus size={18} /> Đăng ký tài khoản
+                    </>
+                  )}
+                </button>
+              </form>
+
+              <div className="auth-footer" style={{ marginTop: "2rem", textAlign: "center" }}>
+                <p style={{ color: "var(--text-muted)" }}>
+                  Đã có tài khoản? <Link to="/login" style={{ fontWeight: 600 }}>Đăng nhập</Link>
+                </p>
+              </div>
+            </div>
           </div>
-          <span
-            style={{
-              color: "var(--text-muted)",
-              fontSize: "0.95rem",
-              fontWeight: 500,
-            }}
-          >
-            Hệ thống nông trại thông minh
-          </span>
         </div>
 
-        <div className="auth-body">
-          <h2 style={{ marginBottom: "0.5rem" }}>Tạo tài khoản</h2>
-          <p
-            className="subtitle"
-            style={{ color: "var(--text-muted)", marginBottom: "1.5rem" }}
-          >
-            Tham gia Yolo Farm và quản lý thiết bị dễ dàng.
-          </p>
-
-          {error && (
-            <div
-              className="auth-error"
-              style={{
-                padding: "0.75rem",
-                background: "#fee2e2",
-                color: "#b91c1c",
-                borderRadius: "4px",
-                marginBottom: "1rem",
-                fontSize: "0.9rem",
-              }}
-            >
-              {error}
-            </div>
-          )}
-
-          {success && (
-            <div
-              className="auth-success"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "0.5rem",
-                padding: "0.75rem",
-                background: "#dcfce3",
-                color: "#166534",
-                borderRadius: "4px",
-                marginBottom: "1rem",
-                fontSize: "0.9rem",
-              }}
-            >
-              <CheckCircle size={18} /> Đăng ký thành công! Đang chuyển hướng...
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="auth-form">
-            <div className="form-group" style={{ marginBottom: "1rem" }}>
-              <label
-                htmlFor="full_name"
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.5rem",
-                  marginBottom: "0.5rem",
-                  fontWeight: 600,
-                }}
-              >
-                <User size={16} /> Họ và tên
-              </label>
-              <input
-                type="text"
-                id="full_name"
-                name="full_name"
-                placeholder="Nhập họ và tên đầy đủ"
-                value={formData.full_name}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div className="form-group" style={{ marginBottom: "1rem" }}>
-              <label
-                htmlFor="username"
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.5rem",
-                  marginBottom: "0.5rem",
-                  fontWeight: 600,
-                }}
-              >
-                <User size={16} /> Tên đăng nhập
-              </label>
-              <input
-                type="text"
-                id="username"
-                name="username"
-                placeholder="Nhập tên đăng nhập"
-                value={formData.username}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div className="form-group" style={{ marginBottom: "1rem" }}>
-              <label
-                htmlFor="email"
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.5rem",
-                  marginBottom: "0.5rem",
-                  fontWeight: 600,
-                }}
-              >
-                <Mail size={16} /> Email
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                placeholder="Nhập địa chỉ email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div
-              className="form-row"
-              style={{ display: "flex", gap: "1rem", marginBottom: "1.5rem" }}
-            >
-              <div className="form-group" style={{ flex: 1 }}>
-                <label
-                  htmlFor="password"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.5rem",
-                    marginBottom: "0.5rem",
-                    fontWeight: 600,
-                  }}
-                >
-                  <Lock size={16} /> Mật khẩu
-                </label>
-                <input
-                  type="password"
-                  id="password"
-                  name="password"
-                  placeholder="Tạo mật khẩu"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div className="form-group" style={{ flex: 1 }}>
-                <label
-                  htmlFor="confirm_password"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.5rem",
-                    marginBottom: "0.5rem",
-                    fontWeight: 600,
-                  }}
-                >
-                  <Lock size={16} /> Xác nhận mật khẩu
-                </label>
-                <input
-                  type="password"
-                  id="confirm_password"
-                  name="confirm_password"
-                  placeholder="Xác nhận mật khẩu"
-                  value={formData.confirm_password}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn-primary"
-              style={{
-                width: "100%",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                gap: "0.5rem",
-                padding: "0.75rem",
-              }}
-            >
-              {loading ? (
-                <>
-                  <RefreshCw size={18} className="spin" /> Đang xử lý...
-                </>
-              ) : (
-                <>
-                  <UserPlus size={18} /> Đăng ký
-                </>
-              )}
-            </button>
-          </form>
-
-          <div
-            className="auth-footer"
+        {/* Image Side with Skeleton */}
+        <div className="hide-on-mobile" style={{ flex: "1.2", position: "relative", overflow: "hidden" }}>
+          {!imgLoaded && <div className="skeleton-bg" style={{ width: "100%", height: "100%", position: "absolute" }}></div>}
+          
+          <img
+            src={regImg}
+            alt="Agricultural Tech"
+            onLoad={() => setImgLoaded(true)}
             style={{
-              marginTop: "1.5rem",
-              textAlign: "center",
-              fontSize: "0.9rem",
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              opacity: imgLoaded ? 1 : 0,
+              transition: "opacity 0.8s ease-in-out, transform 10s ease-out",
+              transform: imgLoaded ? "scale(1)" : "scale(1.05)",
             }}
-          >
-            <p>
-              Đã có tài khoản? <Link to="/login">Đăng nhập</Link>
-            </p>
-          </div>
+          />
+          <div style={{
+            position: "absolute",
+            inset: 0,
+            background: "linear-gradient(to left, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 20%, rgba(0,0,0,0.3) 100%)",
+            opacity: imgLoaded ? 1 : 0,
+            transition: "opacity 0.8s ease-in-out"
+          }}></div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
+
+const labelStyle = { display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem", fontWeight: 600, fontSize: "0.95rem" };
+const inputStyle = { width: "100%", padding: "0.8rem 1rem", borderRadius: "8px", border: "1px solid #e2e8f0", outline: "none", transition: "all 0.2s" };
+const buttonStyle = { width: "100%", display: "flex", justifyContent: "center", alignItems: "center", gap: "0.5rem", padding: "0.85rem", borderRadius: "8px", fontWeight: 600, fontSize: "1rem", transition: "all 0.2s" };
+const errorStyle = { padding: "0.8rem", background: "#fee2e2", color: "#b91c1c", borderRadius: "8px", marginBottom: "1.5rem", fontSize: "0.9rem" };
+const successStyle = { display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.8rem", background: "#dcfce3", color: "#166534", borderRadius: "8px", marginBottom: "1.5rem", fontSize: "0.9rem" };
+
+const skeletonStyles = `
+  @keyframes pulse {
+    0% { background-color: #f1f5f9; }
+    50% { background-color: #e2e8f0; }
+    100% { background-color: #f1f5f9; }
+  }
+  .skeleton-bg { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+  @keyframes spin { 100% { transform: rotate(360deg); } }
+  @media (max-width: 900px) { .hide-on-mobile { display: none !important; } }
+`;
