@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { createNotificationSocket } from '../api';
 import {
   LayoutDashboard,
   Activity,
@@ -17,10 +18,15 @@ import {
   Home,
   Sliders,
   UserCircle,
-  UserCog
+  UserCog,
+  Bell,
+  CircleAlert,
+  CircleCheck,
+  Inbox,
+  X
 } from 'lucide-react';
 
-function NavGroup({ icon: Icon, title, children, activePaths = [], groupId, openGroup, setOpenGroup }) {
+function NavGroup({ icon, title, children, activePaths = [], groupId, openGroup, setOpenGroup }) {
   const location = useLocation();
   const isActive = activePaths.some(path => location.pathname === path || location.pathname.startsWith(`${path}/`));
   const isOpen = openGroup === groupId;
@@ -32,7 +38,7 @@ function NavGroup({ icon: Icon, title, children, activePaths = [], groupId, open
         onClick={() => setOpenGroup(isOpen ? null : groupId)}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <Icon className="nav-icon" />
+          {React.createElement(icon, { className: 'nav-icon' })}
           <span>{title}</span>
         </div>
         {isOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
@@ -47,25 +53,136 @@ function NavGroup({ icon: Icon, title, children, activePaths = [], groupId, open
 }
 
 export default function Layout() {
-  const { user, logout } = useAuth();
+  const { token, user, logout } = useAuth();
   const location = useLocation();
   // role_id = 1 is admin, role_id = 2 is normal user
   const isAdmin = user?.role_id === 1;
   const [openGroup, setOpenGroup] = useState(null);
+  const [notifications, setNotifications] = useState([]);
+  const [notificationPanelOpen, setNotificationPanelOpen] = useState(false);
+  const notificationCenterRef = React.useRef(null);
+  const unreadCount = notifications.filter(item => !item.read).length;
+
+  const dismissNotification = React.useCallback((id) => {
+    setNotifications(current => current.map(item => (
+      item.id === id ? { ...item, showToast: false } : item
+    )));
+  }, []);
+
+  const pushNotification = React.useCallback((payload) => {
+    const id = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    const severity = payload.severity || (payload.type === 'EMERGENCY' ? 'error' : payload.type === 'ALERT' ? 'warning' : 'info');
+    const notification = {
+      id,
+      type: payload.type || 'MESSAGE',
+      severity,
+      title: payload.title || 'Thông báo',
+      message: payload.message || 'Có thông báo mới từ hệ thống',
+      deviceId: payload.device_id,
+      createdAt: payload.created_at,
+      read: false,
+      showToast: true,
+    };
+
+    setNotifications(current => [notification, ...current].slice(0, 10));
+    window.setTimeout(() => dismissNotification(id), 7000);
+  }, [dismissNotification]);
+
+  const markAllNotificationsRead = React.useCallback(() => {
+    setNotifications(current => current.map(item => ({ ...item, read: true })));
+  }, []);
+
+  const clearNotifications = React.useCallback(() => {
+    setNotifications([]);
+    setNotificationPanelOpen(false);
+  }, []);
 
   React.useEffect(() => {
     const homePaths = ['/', '/dashboard', '/devices', '/devices/add', '/threshold-management'];
     const dataPaths = ['/activity', '/statistics', '/sensor-history'];
     const accountPaths = ['/account/me', '/account/users'];
+    let nextGroup = null;
     
     if (homePaths.some(p => location.pathname === p || location.pathname.startsWith(`${p}/`))) {
-      setOpenGroup('home');
+      nextGroup = 'home';
     } else if (dataPaths.some(p => location.pathname === p || location.pathname.startsWith(`${p}/`))) {
-      setOpenGroup('data');
+      nextGroup = 'data';
     } else if (accountPaths.some(p => location.pathname === p || location.pathname.startsWith(`${p}/`))) {
-      setOpenGroup('account');
+      nextGroup = 'account';
     }
+
+    const timer = window.setTimeout(() => {
+      setOpenGroup(nextGroup);
+    }, 0);
+
+    return () => window.clearTimeout(timer);
   }, [location.pathname]);
+
+  React.useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setNotificationPanelOpen(false);
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, [location.pathname]);
+
+  React.useEffect(() => {
+    if (!notificationPanelOpen) return undefined;
+
+    const handleOutsideClick = (event) => {
+      if (!notificationCenterRef.current?.contains(event.target)) {
+        setNotificationPanelOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleOutsideClick);
+    document.addEventListener('touchstart', handleOutsideClick);
+
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+      document.removeEventListener('touchstart', handleOutsideClick);
+    };
+  }, [notificationPanelOpen]);
+
+  React.useEffect(() => {
+    if (!token || !user) return undefined;
+
+    let socket;
+    let reconnectTimer;
+    let pingTimer;
+    let closedByComponent = false;
+
+    const connect = () => {
+      socket = createNotificationSocket(token, {
+        onOpen: () => {
+          pingTimer = window.setInterval(() => {
+            if (socket?.readyState === WebSocket.OPEN) {
+              socket.send('ping');
+            }
+          }, 30000);
+        },
+        onMessage: pushNotification,
+        onClose: () => {
+          if (pingTimer) window.clearInterval(pingTimer);
+          if (!closedByComponent) {
+            reconnectTimer = window.setTimeout(connect, 3000);
+          }
+        },
+        onError: () => {
+          socket?.close();
+        },
+      });
+    };
+
+    connect();
+
+    return () => {
+      closedByComponent = true;
+      if (reconnectTimer) window.clearTimeout(reconnectTimer);
+      if (pingTimer) window.clearInterval(pingTimer);
+      socket?.close();
+    };
+  }, [token, user, pushNotification]);
 
   const getBreadcrumbs = () => {
     const paths = {
@@ -208,6 +325,82 @@ export default function Layout() {
             ))}
           </div>
           <div className="user-info">
+            <div className="notification-center" ref={notificationCenterRef}>
+              <button
+                type="button"
+                className={`notification-bell ${notificationPanelOpen ? 'active' : ''}`}
+                onClick={() => setNotificationPanelOpen(open => !open)}
+                aria-label="Mở thông báo"
+                aria-expanded={notificationPanelOpen}
+              >
+                <Bell size={20} />
+                {unreadCount > 0 && (
+                  <span className="notification-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>
+                )}
+              </button>
+
+              {notificationPanelOpen && (
+                <div className="notification-panel">
+                  <div className="notification-panel-header">
+                    <div>
+                      <h3>Thông báo</h3>
+                      <span>{unreadCount} chua doc</span>
+                    </div>
+                    <button
+                      type="button"
+                      className="notification-panel-action"
+                      onClick={markAllNotificationsRead}
+                      disabled={unreadCount === 0}
+                    >
+                      Da doc
+                    </button>
+                  </div>
+
+                  <div className="notification-panel-list">
+                    {notifications.length === 0 ? (
+                      <div className="notification-empty">
+                        <Inbox size={24} />
+                        <span>Chưa có thông báo mới</span>
+                      </div>
+                    ) : (
+                      notifications.map(notification => {
+                        const Icon = notification.severity === 'error'
+                          ? CircleAlert
+                          : notification.severity === 'success'
+                            ? CircleCheck
+                            : notification.severity === 'warning'
+                              ? CircleAlert
+                              : Bell;
+
+                        return (
+                          <button
+                            type="button"
+                            key={notification.id}
+                            className={`notification-panel-item notification-panel-item-${notification.severity} ${notification.read ? '' : 'unread'}`}
+                            onClick={() => setNotifications(current => current.map(item => (
+                              item.id === notification.id ? { ...item, read: true } : item
+                            )))}
+                          >
+                            {React.createElement(Icon, { size: 18, className: 'notification-panel-icon' })}
+                            <span className="notification-panel-copy">
+                              <strong>{notification.title}</strong>
+                              <span>{notification.message}</span>
+                              {notification.deviceId && <em>Thiet bi #{notification.deviceId}</em>}
+                            </span>
+                          </button>
+                        );
+                      })
+                    )}
+                  </div>
+
+                  {notifications.length > 0 && (
+                    <button type="button" className="notification-clear" onClick={clearNotifications}>
+                      Xoa tat ca
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
             <span>Xin chào, {user?.full_name || user?.username || 'User'}!</span>
           </div>
         </header>
@@ -215,6 +408,39 @@ export default function Layout() {
         <main className="dashboard-body">
           <Outlet />
         </main>
+      </div>
+
+      <div className="notification-stack" aria-live="polite" aria-atomic="false">
+        {notifications.filter(notification => notification.showToast).map(notification => {
+          const Icon = notification.severity === 'error'
+            ? CircleAlert
+            : notification.severity === 'success'
+              ? CircleCheck
+              : notification.severity === 'warning'
+                ? CircleAlert
+                : Bell;
+
+          return (
+            <div key={notification.id} className={`ws-toast ws-toast-${notification.severity}`}>
+              {React.createElement(Icon, { size: 22, className: 'ws-toast-icon' })}
+              <div className="ws-toast-content">
+                <div className="ws-toast-title">
+                  <span>{notification.title}</span>
+                  {notification.deviceId && <span className="ws-toast-device">#{notification.deviceId}</span>}
+                </div>
+                <p>{notification.message}</p>
+              </div>
+              <button
+                type="button"
+                className="ws-toast-close"
+                onClick={() => dismissNotification(notification.id)}
+                aria-label="Đóng"
+              >
+                <X size={16} />
+              </button>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
