@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from models.domain_models import Device, SensorData, ActivityLog
 from websocket.manager import ConnectionManager
 from repositories import log_repository
+from services.notification_service import broadcast_notification
 
 logger = logging.getLogger(__name__)
 
@@ -104,14 +105,16 @@ async def check_and_alert(
         )
 
         # UC4-1: Push ALERT lên WebSocket
-        await ws_manager.broadcast({
-            "type":       "ALERT",
-            "device_id":  device_id,
-            "field":      field,
-            "value":      value,
-            "threshold":  vtype,   # "min" | "max"
-            "message":    description,
-        })
+        await broadcast_notification(
+            "ALERT",
+            description,
+            manager=ws_manager,
+            device_id=device_id,
+            severity="warning",
+            field=field,
+            value=value,
+            threshold=vtype,
+        )
 
         logger.warning(f"[THRESHOLD] {description} — device_id={device_id}")
 

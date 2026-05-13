@@ -10,6 +10,7 @@ from websocket.manager import ConnectionManager, ws_manager
 from repositories import device_repository, command_repository, log_repository
 from core.config import settings
 from mqtt.client import publish_command
+from services.notification_service import broadcast_notification
 
 logger = logging.getLogger(__name__)
 
@@ -70,14 +71,17 @@ async def manual_control(
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Gửi lệnh tới thiết bị thất bại: {e}")
 
-    await ws_manager.broadcast({
-        "type":       "STATE_UPDATE",
-        "device_id":  device_id,
-        "actuator":   actuator,
-        "action":     body.action,
-        "source":     "manual",
-        "command_id": cmd.command_id,
-    })
+    await broadcast_notification(
+        "STATE_UPDATE",
+        f"Da gui lenh {'bat' if is_active else 'tat'} {actuator} cho thiet bi {device_id}",
+        manager=ws_manager,
+        device_id=device_id,
+        severity="success",
+        actuator=actuator,
+        action=body.action,
+        source="manual",
+        command_id=cmd.command_id,
+    )
 
     return ControlResponse(
         device_id=device_id,
@@ -121,12 +125,14 @@ async def acknowledge_command(db: Session, device_id: int, body: AckCommandSchem
             description=f"Thiết bị xác nhận {cmd.action} {cmd.actuator} thành công",
         )
 
-        await ws_manager.broadcast({
-            "type":      "STATE_UPDATE",
-            "device_id": device_id,
-            "actuator":  cmd.actuator,
-            "status":    cmd.action == "on",
-        })
+        await broadcast_notification(
+            "STATE_UPDATE",
+            f"Thiet bi {device_id} da xac nhan {cmd.actuator}",
+            device_id=device_id,
+            severity="success",
+            actuator=cmd.actuator,
+            status=cmd.action == "on",
+        )
 
         return MessageResponse(message="Xác nhận thành công")
     else:
@@ -171,14 +177,17 @@ async def auto_control(
             description=f"Tự động {action} {actuator} do vượt ngưỡng",
         )
 
-        await ws_manager.broadcast({
-            "type":      "STATE_UPDATE",
-            "device_id": device_id,
-            "actuator":  actuator,
-            "action":    action,
-            "source":    "auto",
-            "command_id": cmd.command_id,
-        })
+        await broadcast_notification(
+            "STATE_UPDATE",
+            f"Tu dong gui lenh {action} {actuator} cho thiet bi {device_id}",
+            manager=ws_manager,
+            device_id=device_id,
+            severity="info",
+            actuator=actuator,
+            action=action,
+            source="auto",
+            command_id=cmd.command_id,
+        )
 
         try:
             feed_key = f"{actuator}-control"
@@ -206,11 +215,13 @@ async def emergency_alert(
         description=error_detail,
     )
 
-    await ws_manager.broadcast({
-        "type":         "EMERGENCY",
-        "device_id":    device_id,
-        "error_detail": error_detail,
-        "message":      f"Không thể điều khiển thiết bị {device_id}: {error_detail}",
-    })
+    await broadcast_notification(
+        "EMERGENCY",
+        f"Khong the dieu khien thiet bi {device_id}: {error_detail}",
+        manager=ws_manager,
+        device_id=device_id,
+        severity="error",
+        error_detail=error_detail,
+    )
 
     logger.error(f"[EMERGENCY] device_id={device_id} --- {error_detail}")
