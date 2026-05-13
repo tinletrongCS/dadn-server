@@ -2,7 +2,9 @@
 
 html {
   zoom: 0.85;
-  background-color: var(--bg-color); /* Tránh bị "flash" màu xanh khi reload trang */
+  background-color: var(
+    --bg-color
+  ); /* Tránh bị "flash" màu xanh khi reload trang */
 }
 
 :root {
@@ -43,12 +45,12 @@ body {
 
 /* Authentication Layouts */
 .auth-layout {
-  min-height: 100vh;
+  min-height: 117.7vh;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 1rem;
-  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce3 100%);
+  background: var(--bg-color);
 }
 
 .auth-card {
@@ -66,7 +68,7 @@ body {
 }
 
 .auth-header {
-  background-color: var(--primary-green);
+  background-color: var(--sidebar-bg);
   padding: 2rem 1.5rem;
   display: flex;
   flex-direction: column;
@@ -181,8 +183,8 @@ body {
 }
 
 .btn-primary {
-  background-color: var(--primary-green);
-  color: white;
+  background-color: var(--sidebar-bg);
+  color: var(--sidebar-text);
   border: none;
   border-radius: var(--radius-md);
   padding: 0.75rem;
@@ -198,11 +200,12 @@ body {
 }
 
 .btn-primary:not(:disabled):hover {
-  background-color: var(--primary-green-dark);
+  color: var(--sidebar-text-active);
 }
 
 .btn-primary:not(:disabled):active {
   transform: translateY(1px);
+  background: var(--primary-green-dark);
 }
 
 .btn-primary:disabled {
@@ -234,13 +237,14 @@ body {
 }
 
 .auth-footer a {
-  color: var(--primary-green);
+  color: var(--text-main);
   text-decoration: none;
   font-weight: 500;
 }
 
 .auth-footer a:hover {
   text-decoration: underline;
+  color: var(--primary-green-dark);
 }
 
 /* Dashboard Layout */
@@ -345,7 +349,6 @@ body {
 .nav-group-content .nav-item {
   padding-left: 2.75rem;
 }
-
 
 .nav-item {
   display: flex;
@@ -453,8 +456,9 @@ body {
 }
 
 .loading-screen {
-  min-height: 100vh;
+  min-height: 117.7vh;
   display: flex;
+  flex-direction: column; 
   align-items: center;
   justify-content: center;
   font-weight: 500;
@@ -722,7 +726,9 @@ body {
   flex-direction: column;
   gap: 0.75rem;
   padding: 1.25rem;
-  transition: box-shadow 0.2s, border-color 0.2s;
+  transition:
+    box-shadow 0.2s,
+    border-color 0.2s;
   width: 100%;
   max-width: 800px;
 }
@@ -965,7 +971,9 @@ body {
   font-family: inherit;
   font-size: 0.82rem;
   font-weight: 600;
-  transition: background 0.2s, color 0.2s;
+  transition:
+    background 0.2s,
+    color 0.2s;
   position: relative;
   min-width: 110px;
 }
@@ -1000,7 +1008,7 @@ body {
 }
 
 .toggle-thumb::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 2px;
   left: 2px;
