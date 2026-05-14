@@ -18,7 +18,6 @@ async function authFetch(url, token, options = {}) {
   return data;
 }
 
-// ==================== AUTH ====================
 
 export async function loginUser(username, password) {
   const formData = new URLSearchParams();
