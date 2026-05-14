@@ -75,15 +75,15 @@ async def send_notification_to_user(
 
 def _default_title(notification_type: str, severity: str) -> str:
     if notification_type == "ALERT":
-        return "Canh bao nguong"
+        return "Cảnh báo ngưỡng môi trường"
     if notification_type == "EMERGENCY":
-        return "Loi dieu khien"
+        return "Lõo điều khiển"
     if notification_type == "STATE_UPDATE":
-        return "Cap nhat thiet bi"
+        return "Cập nhật thiết bị"
     if severity == "success":
-        return "Thanh cong"
+        return "Thành công"
     if severity == "warning":
-        return "Canh bao"
+        return "Cảnh báo"
     if severity == "error":
-        return "Loi"
+        return "Lỗi"
     return "Thông báo"
