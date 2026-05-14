@@ -77,9 +77,9 @@ def _default_title(notification_type: str, severity: str) -> str:
     if notification_type == "ALERT":
         return "Cảnh báo ngưỡng môi trường"
     if notification_type == "EMERGENCY":
-        return "Lõo điều khiển"
+        return "Lỗi điều khiển"
     if notification_type == "STATE_UPDATE":
-        return "Cập nhật thiết bị"
+        return "Cập nhật trạng thái thiết bị"
     if severity == "success":
         return "Thành công"
     if severity == "warning":
